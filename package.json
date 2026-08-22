@@ -1,0 +1,16 @@
+{
+  "name": "todos-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "build:shared": "npm run build -w packages/shared",
+    "build:frontend": "npm run build -w frontend",
+    "test:backend": "npm run test -w backend"
+  }
+}

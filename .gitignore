@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+dist/
+.wrangler/
+.dev.vars
+*.log
+.DS_Store
+.env
+.env.local
+.turbo/
+coverage/

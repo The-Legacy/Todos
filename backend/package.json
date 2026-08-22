@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "db:migrate:local": "wrangler d1 migrations apply todos-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply todos-db --remote",
+    "seed:local": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "@todos/shared": "*",
+    "hono": "^4.6.9"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^9.20.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.125.0"
+  }
+}
