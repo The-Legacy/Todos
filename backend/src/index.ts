@@ -6,6 +6,7 @@ import categories from "./routes/categories";
 import tasks from "./routes/tasks";
 import week from "./routes/week";
 import today from "./routes/today";
+import projects from "./routes/projects";
 
 const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
@@ -26,6 +27,7 @@ app.route("/api/categories", categories);
 app.route("/api/tasks", tasks);
 app.route("/api/week", week);
 app.route("/api/today", today);
+app.route("/api/projects", projects);
 
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 

@@ -118,6 +118,24 @@ describe("today", () => {
     const body = await res.json<any>();
     expect(body.overdue).toHaveLength(0);
   });
+
+  it("respects weekStartsOn=0 (Sunday) when grouping this week's backlog", async () => {
+    const { token } = await signup("today-c@example.com");
+    // 2026-08-23 is a Sunday; with a Sunday week start, 2026-08-25 (Tuesday) falls in the
+    // week that starts 2026-08-23, not the Monday-based week (2026-08-24).
+    await authed(token, "/api/tasks", {
+      method: "POST",
+      body: JSON.stringify({ title: "Sunday-week backlog item", weekStart: "2026-08-23" }),
+    });
+
+    const mondayBased = await (await authed(token, "/api/today?date=2026-08-25")).json<any>();
+    expect(mondayBased.weekStart).toBe(MONDAY);
+    expect(mondayBased.backlog).toHaveLength(0);
+
+    const sundayBased = await (await authed(token, "/api/today?date=2026-08-25&weekStartsOn=0")).json<any>();
+    expect(sundayBased.weekStart).toBe("2026-08-23");
+    expect(sundayBased.backlog.map((t: any) => t.title)).toEqual(["Sunday-week backlog item"]);
+  });
 });
 
 describe("reorder", () => {

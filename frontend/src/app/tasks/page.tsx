@@ -5,6 +5,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskItem } from "@/components/task-item";
 import { useCategories } from "@/hooks/use-categories";
+import { useProjects } from "@/hooks/use-projects";
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from "@/hooks/use-tasks";
 import type { TaskStatus } from "@todos/shared";
 
@@ -21,6 +22,7 @@ function TasksContent() {
   const [categoryFilter, setCategoryFilter] = useState("");
 
   const { data: categories } = useCategories();
+  const { data: projects } = useProjects();
   const { data: tasks, isLoading } = useTasks();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -91,6 +93,7 @@ function TasksContent() {
             key={task.id}
             task={task}
             categories={categories ?? []}
+            projects={projects ?? []}
             onUpdate={(input) => updateTask.mutate({ id: task.id, input })}
             onDelete={() => deleteTask.mutate(task.id)}
           />

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Category, Task, TaskPriority } from "@todos/shared";
+import Link from "next/link";
+import type { Category, Project, Task, TaskPriority } from "@todos/shared";
 import { CategoryBadge } from "@/components/category-badge";
 import { PRIORITY_LABELS, PRIORITY_STYLES, isOverdue } from "@/lib/priority";
 import type { UpdateTaskInput } from "@/lib/api";
@@ -9,21 +10,24 @@ import type { UpdateTaskInput } from "@/lib/api";
 interface TaskItemProps {
   task: Task;
   categories: Category[];
+  projects: Project[];
   onUpdate: (input: UpdateTaskInput) => void;
   onDelete: () => void;
 }
 
-export function TaskItem({ task, categories, onUpdate, onDelete }: TaskItemProps) {
+export function TaskItem({ task, categories, projects, onUpdate, onDelete }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState({
     title: task.title,
     description: task.description ?? "",
     categoryId: task.categoryId ?? "",
+    projectId: task.projectId ?? "",
     priority: task.priority,
     dueDate: task.dueDate ?? "",
   });
 
   const category = categories.find((c) => c.id === task.categoryId) ?? null;
+  const project = projects.find((p) => p.id === task.projectId) ?? null;
   const completed = task.status === "completed";
   const overdue = isOverdue(task.dueDate, task.status);
 
@@ -32,6 +36,7 @@ export function TaskItem({ task, categories, onUpdate, onDelete }: TaskItemProps
       title: draft.title.trim() || task.title,
       description: draft.description.trim() || null,
       categoryId: draft.categoryId || null,
+      projectId: draft.projectId || null,
       priority: draft.priority,
       dueDate: draft.dueDate || null,
     });
@@ -91,6 +96,18 @@ export function TaskItem({ task, categories, onUpdate, onDelete }: TaskItemProps
                 onChange={(e) => setDraft((d) => ({ ...d, dueDate: e.target.value }))}
                 className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
               />
+              <select
+                value={draft.projectId}
+                onChange={(e) => setDraft((d) => ({ ...d, projectId: e.target.value }))}
+                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              >
+                <option value="">No project</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex gap-2">
               <button
@@ -122,7 +139,17 @@ export function TaskItem({ task, categories, onUpdate, onDelete }: TaskItemProps
               )}
             </div>
             {task.description && <p className="text-xs text-zinc-500">{task.description}</p>}
-            <CategoryBadge category={category} />
+            <div className="flex flex-wrap items-center gap-2">
+              <CategoryBadge category={category} />
+              {project && (
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="text-xs text-zinc-400 underline hover:text-zinc-900 dark:hover:text-white"
+                >
+                  {project.name}
+                </Link>
+              )}
+            </div>
           </div>
         )}
 

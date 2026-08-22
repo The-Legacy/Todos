@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/today", label: "Today" },
   { href: "/week", label: "Week" },
   { href: "/backlog", label: "Backlog" },
+  { href: "/projects", label: "Projects" },
   { href: "/tasks", label: "Tasks" },
   { href: "/categories", label: "Categories" },
 ] as const;
@@ -26,7 +27,7 @@ export function Nav() {
         <span className="shrink-0 text-sm font-semibold">Todos</span>
         <div className="flex items-center gap-1 overflow-x-auto">
           {LINKS.map((link) => {
-            const active = pathname === link.href;
+            const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (
               <Link
                 key={link.href}

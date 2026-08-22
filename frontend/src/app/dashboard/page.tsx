@@ -6,7 +6,9 @@ import { RequireAuth } from "@/components/require-auth";
 import { useCategories } from "@/hooks/use-categories";
 import { useUpdateTask } from "@/hooks/use-tasks";
 import { useToday } from "@/hooks/use-today";
+import { useProjects } from "@/hooks/use-projects";
 import { CategoryBadge } from "@/components/category-badge";
+import { ProgressBar } from "@/components/progress-bar";
 import { formatDayLabel } from "@/lib/dates";
 import { addDays } from "@todos/shared";
 
@@ -14,7 +16,9 @@ function DashboardContent() {
   const { user } = useAuth();
   const { data } = useToday();
   const { data: categories } = useCategories();
+  const { data: projects } = useProjects();
   const updateTask = useUpdateTask();
+  const activeProjects = projects?.filter((p) => p.status === "active") ?? [];
 
   const categoryById = (id: string | null) => categories?.find((c) => c.id === id) ?? null;
   const weekDays = data ? Array.from({ length: 7 }, (_, i) => addDays(data.weekStart, i)) : [];
@@ -99,9 +103,28 @@ function DashboardContent() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Active projects</h2>
-        <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-400 dark:border-zinc-700">
-          Projects land in the next phase.
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">Active projects</h2>
+          <Link href="/projects" className="text-xs font-medium text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
+            Open Projects →
+          </Link>
+        </div>
+        {activeProjects.length === 0 && (
+          <p className="rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-400 dark:border-zinc-700">
+            No active projects yet. <Link href="/projects" className="underline">Start one</Link>.
+          </p>
+        )}
+        <div className="flex flex-col gap-3">
+          {activeProjects.map((project) => (
+            <Link
+              key={project.id}
+              href={`/projects/${project.id}`}
+              className="flex flex-col gap-1.5 rounded-lg border border-zinc-200 p-3 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
+            >
+              <span className="text-sm font-medium">{project.name}</span>
+              <ProgressBar progress={project.progress} />
+            </Link>
+          ))}
         </div>
       </section>
     </div>

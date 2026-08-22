@@ -1,4 +1,4 @@
-import type { AuthResponse, Category, Task, TaskPriority, TaskStatus } from "@todos/shared";
+import type { AuthResponse, Category, Project, ProjectStatus, Task, TaskPriority, TaskStatus } from "@todos/shared";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
 
@@ -100,6 +100,25 @@ export interface TodayResponse {
   backlog: Task[];
 }
 
+export interface ProjectWithProgress extends Project {
+  taskCounts: { total: number; completed: number; remaining: number };
+  progress: number;
+}
+
+export interface CreateProjectInput {
+  name: string;
+  description?: string | null;
+  status?: ProjectStatus;
+  targetDate?: string | null;
+}
+
+export interface UpdateProjectInput {
+  name?: string;
+  description?: string | null;
+  status?: ProjectStatus;
+  targetDate?: string | null;
+}
+
 function toQueryString(filters: TaskFilters = {}): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {
@@ -149,4 +168,19 @@ export const api = {
 
   today: (token: string, date?: string) =>
     request<TodayResponse>(`/api/today${date ? `?date=${date}` : ""}`, { token }),
+
+  projects: {
+    list: (token: string) => request<{ projects: ProjectWithProgress[] }>("/api/projects", { token }),
+    get: (token: string, id: string) =>
+      request<{ project: ProjectWithProgress; tasks: Task[] }>(`/api/projects/${id}`, { token }),
+    create: (token: string, input: CreateProjectInput) =>
+      request<{ project: ProjectWithProgress }>("/api/projects", { method: "POST", token, body: JSON.stringify(input) }),
+    update: (token: string, id: string, input: UpdateProjectInput) =>
+      request<{ project: ProjectWithProgress }>(`/api/projects/${id}`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify(input),
+      }),
+    remove: (token: string, id: string) => request<void>(`/api/projects/${id}`, { method: "DELETE", token }),
+  },
 };

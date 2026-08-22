@@ -75,12 +75,14 @@ export function addDays(dateISO: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Returns the Monday of the week containing `dateISO`. */
-export function getWeekStart(dateISO: string): string {
+export type WeekStartDay = 0 | 1; // 0 = Sunday, 1 = Monday
+
+/** Returns the first day of the week containing `dateISO`, per `startDay` (defaults to Monday). */
+export function getWeekStart(dateISO: string, startDay: WeekStartDay = 1): string {
   const d = new Date(`${dateISO}T00:00:00Z`);
   const day = d.getUTCDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  return addDays(dateISO, mondayOffset);
+  const offset = (day - startDay + 7) % 7;
+  return addDays(dateISO, -offset);
 }
 
 export function getWeekDates(weekStart: string): string[] {

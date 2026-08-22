@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { AppVariables } from "../types/env";
 import { requireAuth } from "../middleware/requireAuth";
-import { getWeekStart, isValidDateString } from "@todos/shared";
+import { getWeekStart, isValidDateString, type WeekStartDay } from "@todos/shared";
 
 const today = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 today.use("*", requireAuth);
@@ -22,7 +22,9 @@ today.get("/", async (c) => {
     return c.json({ error: "date must be an ISO date (YYYY-MM-DD)" }, 400);
   }
 
-  const weekStart = getWeekStart(date);
+  const weekStartsOnParam = c.req.query("weekStartsOn");
+  const weekStartsOn: WeekStartDay = weekStartsOnParam === "0" ? 0 : 1;
+  const weekStart = getWeekStart(date, weekStartsOn);
 
   const [todayResult, overdueResult, backlogResult] = await Promise.all([
     c.env.DB.prepare(
