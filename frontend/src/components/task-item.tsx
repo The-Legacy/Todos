@@ -140,6 +140,11 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
           <div className="flex flex-1 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className={`text-sm font-medium ${completed ? "line-through" : ""}`}>{task.title}</span>
+              {task.recurringTaskId && (
+                <span aria-label="Recurring task" title="Recurring task" className="text-zinc-300 dark:text-zinc-600">
+                  ↻
+                </span>
+              )}
               <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${PRIORITY_STYLES[task.priority]}`}>
                 {PRIORITY_LABELS[task.priority]}
               </span>

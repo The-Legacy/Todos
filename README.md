@@ -91,14 +91,26 @@ Custom, session-token based — no third-party auth provider:
 ## Database
 
 D1 (SQLite) with migrations under `backend/migrations/`. Core tables:
-`users`, `sessions`, `categories`, `projects`, `tasks`. See
-`backend/migrations/0001_initial.sql` for the full schema, indexes, and
-foreign keys.
+`users`, `sessions`, `categories`, `projects`, `tasks`, `recurring_tasks`.
+See `backend/migrations/0001_initial.sql` and `0002_recurring_tasks.sql`
+for the full schema, indexes, and foreign keys.
 
 A task's status is one of `backlog | scheduled | completed | cancelled`.
 Once a task is scheduled, its week is derived from `scheduled_date`; while
 still unscheduled in a week's backlog, it carries an explicit `week_start`
 so backlog queries don't need a join table.
+
+**Recurring tasks**: a `recurring_tasks` row is a rule, not a task — it
+stores which weekdays it fires on as a bitmask (`days_of_week`), plus a
+`start_date`/optional `end_date`. `backend/src/db/materialize.ts` turns
+that into real `tasks` rows on demand: every `/api/week` and `/api/today`
+request materializes any missing instances for the dates it's about to
+return, so nothing needs a cron trigger. Each generated task carries
+`recurring_task_id` (which rule made it) and `recurrence_date` (which
+calendar day it represents) — kept separate from `scheduled_date` so that
+dragging a generated instance to a different day doesn't cause it to be
+regenerated (and duplicated) back on its original day. A unique index on
+`(recurring_task_id, recurrence_date)` makes materialization idempotent.
 
 To create a new migration:
 
@@ -154,10 +166,14 @@ Built in phases, all landed:
    errors (on top of the existing optimistic-update rollback), a
    configurable week start day and default task duration, and a dismissible
    first-run onboarding banner.
-
-Recurring tasks (originally scoped as an optional Phase 6) are not built —
-the schema doesn't block adding them later, but there's no UI or backend
-support for recurrence rules yet.
+6. **Recurring tasks** — define a rule (title, days of week, optional
+   category/project/priority/duration, optional start/end date) once at
+   `/recurring`; matching task instances are generated automatically
+   whenever you view a week or day that needs them (no cron required). Each
+   generated instance is a normal, independent task — completing, editing,
+   or dragging it to another day never touches the rule or any other
+   instance, and pausing or deleting a rule never deletes what's already
+   been generated.
 
 Note: appearance/week-start-day/default-duration preferences are stored in
 `localStorage`, per browser — they don't sync across devices the way task

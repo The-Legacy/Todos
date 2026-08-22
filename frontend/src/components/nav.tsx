@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/backlog", label: "Backlog" },
   { href: "/projects", label: "Projects" },
   { href: "/tasks", label: "Tasks" },
+  { href: "/recurring", label: "Recurring" },
   { href: "/categories", label: "Categories" },
   { href: "/settings", label: "Settings" },
 ] as const;

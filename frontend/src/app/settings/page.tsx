@@ -96,13 +96,21 @@ function SettingsContent() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Categories</h2>
-        <Link
-          href="/categories"
-          className="self-start rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-        >
-          Manage categories →
-        </Link>
+        <h2 className="text-sm font-semibold">Categories &amp; recurring tasks</h2>
+        <div className="flex gap-2">
+          <Link
+            href="/categories"
+            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Manage categories →
+          </Link>
+          <Link
+            href="/recurring"
+            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+          >
+            Manage recurring tasks →
+          </Link>
+        </div>
       </section>
     </div>
   );

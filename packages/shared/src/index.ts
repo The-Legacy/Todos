@@ -44,6 +44,27 @@ export interface Task {
   estimatedMinutes: number | null;
   position: number;
   completedAt: string | null;
+  recurringTaskId: string | null;
+  recurrenceDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecurringTask {
+  id: string;
+  userId: string;
+  categoryId: string | null;
+  projectId: string | null;
+  title: string;
+  description: string | null;
+  priority: TaskPriority;
+  estimatedMinutes: number | null;
+  /** Weekday integers (0 = Sunday .. 6 = Saturday, matching `Date#getUTCDay()`) this recurs on.
+   * Stored as a bitmask in the database, but the API always sends/accepts this as an array. */
+  daysOfWeek: number[];
+  startDate: string;
+  endDate: string | null;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,4 +112,30 @@ export function getWeekDates(weekStart: string): string[] {
 
 export function isValidDateString(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+export const WEEKDAY_SHORT_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export function daysOfWeekToMask(days: number[]): number {
+  return days.reduce((mask, day) => mask | (1 << day), 0);
+}
+
+export function maskToDaysOfWeek(mask: number): number[] {
+  const days: number[] = [];
+  for (let day = 0; day < 7; day++) {
+    if (mask & (1 << day)) days.push(day);
+  }
+  return days;
+}
+
+export function dateMatchesDaysOfWeekMask(dateISO: string, mask: number): boolean {
+  const day = new Date(`${dateISO}T00:00:00Z`).getUTCDay();
+  return (mask & (1 << day)) !== 0;
+}
+
+export function describeDaysOfWeekMask(mask: number): string {
+  const days = maskToDaysOfWeek(mask);
+  if (days.length === 7) return "Daily";
+  if (days.length === 1) return `Every ${WEEKDAY_SHORT_LABELS[days[0]]}`;
+  return days.map((d) => WEEKDAY_SHORT_LABELS[d]).join(", ");
 }

@@ -1,4 +1,13 @@
-import type { AuthResponse, Category, Project, ProjectStatus, Task, TaskPriority, TaskStatus } from "@todos/shared";
+import type {
+  AuthResponse,
+  Category,
+  Project,
+  ProjectStatus,
+  RecurringTask,
+  Task,
+  TaskPriority,
+  TaskStatus,
+} from "@todos/shared";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
 
@@ -119,6 +128,31 @@ export interface UpdateProjectInput {
   targetDate?: string | null;
 }
 
+export interface CreateRecurringTaskInput {
+  title: string;
+  description?: string | null;
+  categoryId?: string | null;
+  projectId?: string | null;
+  priority?: TaskPriority;
+  estimatedMinutes?: number | null;
+  daysOfWeek: number[];
+  startDate: string;
+  endDate?: string | null;
+}
+
+export interface UpdateRecurringTaskInput {
+  title?: string;
+  description?: string | null;
+  categoryId?: string | null;
+  projectId?: string | null;
+  priority?: TaskPriority;
+  estimatedMinutes?: number | null;
+  daysOfWeek?: number[];
+  startDate?: string;
+  endDate?: string | null;
+  active?: boolean;
+}
+
 function toQueryString(filters: TaskFilters = {}): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {
@@ -187,5 +221,22 @@ export const api = {
         body: JSON.stringify(input),
       }),
     remove: (token: string, id: string) => request<void>(`/api/projects/${id}`, { method: "DELETE", token }),
+  },
+
+  recurringTasks: {
+    list: (token: string) => request<{ recurringTasks: RecurringTask[] }>("/api/recurring-tasks", { token }),
+    create: (token: string, input: CreateRecurringTaskInput) =>
+      request<{ recurringTask: RecurringTask }>("/api/recurring-tasks", {
+        method: "POST",
+        token,
+        body: JSON.stringify(input),
+      }),
+    update: (token: string, id: string, input: UpdateRecurringTaskInput) =>
+      request<{ recurringTask: RecurringTask }>(`/api/recurring-tasks/${id}`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify(input),
+      }),
+    remove: (token: string, id: string) => request<void>(`/api/recurring-tasks/${id}`, { method: "DELETE", token }),
   },
 };

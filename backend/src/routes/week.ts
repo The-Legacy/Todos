@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { AppVariables } from "../types/env";
 import { requireAuth } from "../middleware/requireAuth";
 import { getWeekDates, isValidDateString } from "@todos/shared";
+import { materializeRecurringTasks } from "../db/materialize";
 
 const week = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 week.use("*", requireAuth);
@@ -11,6 +12,7 @@ const TASK_COLUMNS = `
   title, description, status, priority, due_date as dueDate,
   scheduled_date as scheduledDate, week_start as weekStart,
   estimated_minutes as estimatedMinutes, position, completed_at as completedAt,
+  recurring_task_id as recurringTaskId, recurrence_date as recurrenceDate,
   created_at as createdAt, updated_at as updatedAt
 `;
 
@@ -24,6 +26,8 @@ week.get("/:weekStart", async (c) => {
 
   const dates = getWeekDates(weekStart);
   const weekEnd = dates[dates.length - 1];
+
+  await materializeRecurringTasks(c.env.DB, userId, dates);
 
   const [scheduledResult, backlogResult] = await Promise.all([
     c.env.DB.prepare(

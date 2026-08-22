@@ -63,6 +63,11 @@ export function PlannerTaskCard({
           <div className="flex items-center gap-1.5">
             <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[task.priority]}`} />
             <span className={`font-medium ${completed ? "line-through" : ""}`}>{task.title}</span>
+            {task.recurringTaskId && (
+              <span aria-label="Recurring task" title="Recurring task" className="text-zinc-300 dark:text-zinc-600">
+                ↻
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             <CategoryBadge category={category} />

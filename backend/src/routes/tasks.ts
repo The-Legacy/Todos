@@ -13,6 +13,7 @@ const TASK_COLUMNS = `
   title, description, status, priority, due_date as dueDate,
   scheduled_date as scheduledDate, week_start as weekStart,
   estimated_minutes as estimatedMinutes, position, completed_at as completedAt,
+  recurring_task_id as recurringTaskId, recurrence_date as recurrenceDate,
   created_at as createdAt, updated_at as updatedAt
 `;
 

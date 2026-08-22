@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import type { AppVariables } from "../types/env";
 import { requireAuth } from "../middleware/requireAuth";
-import { getWeekStart, isValidDateString, type WeekStartDay } from "@todos/shared";
+import { getWeekDates, getWeekStart, isValidDateString, type WeekStartDay } from "@todos/shared";
+import { materializeRecurringTasks } from "../db/materialize";
 
 const today = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 today.use("*", requireAuth);
@@ -11,6 +12,7 @@ const TASK_COLUMNS = `
   title, description, status, priority, due_date as dueDate,
   scheduled_date as scheduledDate, week_start as weekStart,
   estimated_minutes as estimatedMinutes, position, completed_at as completedAt,
+  recurring_task_id as recurringTaskId, recurrence_date as recurrenceDate,
   created_at as createdAt, updated_at as updatedAt
 `;
 
@@ -25,6 +27,12 @@ today.get("/", async (c) => {
   const weekStartsOnParam = c.req.query("weekStartsOn");
   const weekStartsOn: WeekStartDay = weekStartsOnParam === "0" ? 0 : 1;
   const weekStart = getWeekStart(date, weekStartsOn);
+
+  // Materialize the whole week-to-date, not just `date`, so a recurring task from earlier this
+  // week that was never viewed still shows up (correctly flagged overdue) instead of silently
+  // never having been generated.
+  const datesToMaterialize = getWeekDates(weekStart).filter((d) => d <= date);
+  await materializeRecurringTasks(c.env.DB, userId, datesToMaterialize);
 
   const [todayResult, overdueResult, backlogResult] = await Promise.all([
     c.env.DB.prepare(
