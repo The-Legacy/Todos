@@ -3,7 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { QueryProvider } from "@/lib/query-provider";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme-context";
+import { SettingsProvider } from "@/lib/settings-context";
+import { ToastProvider } from "@/lib/toast-context";
 import { Nav } from "@/components/nav";
+import { BottomNav } from "@/components/bottom-nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,15 +28,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
-        <QueryProvider>
-          <AuthProvider>
-            <Nav />
-            <div className="flex flex-1 flex-col">{children}</div>
-          </AuthProvider>
-        </QueryProvider>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+        <ToastProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <SettingsProvider>
+                  <Nav />
+                  <div className="flex flex-1 flex-col pb-16 md:pb-0">{children}</div>
+                  <BottomNav />
+                </SettingsProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </QueryProvider>
+        </ToastProvider>
       </body>
     </html>
   );

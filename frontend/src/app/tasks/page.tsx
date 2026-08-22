@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskItem } from "@/components/task-item";
@@ -20,6 +20,9 @@ const STATUS_TABS: Array<{ label: string; value: TaskStatus | "all" }> = [
 function TasksContent() {
   const [statusTab, setStatusTab] = useState<TaskStatus | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [projectFilter, setProjectFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();
@@ -28,22 +31,39 @@ function TasksContent() {
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+      if (e.key === "/" && !isTyping) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      if (e.key === "Escape" && target === searchInputRef.current) {
+        setSearch("");
+        searchInputRef.current?.blur();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const filteredTasks = useMemo(() => {
+    const query = search.trim().toLowerCase();
     return (tasks ?? []).filter((task) => {
       if (statusTab !== "all" && task.status !== statusTab) return false;
       if (categoryFilter && task.categoryId !== categoryFilter) return false;
+      if (projectFilter && task.projectId !== projectFilter) return false;
+      if (query && !task.title.toLowerCase().includes(query)) return false;
       return true;
     });
-  }, [tasks, statusTab, categoryFilter]);
+  }, [tasks, statusTab, categoryFilter, projectFilter, search]);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10">
       <div>
         <h1 className="text-xl font-semibold">Tasks</h1>
-        <p className="text-sm text-zinc-500">
-          Everything you&apos;ve captured. Weekly scheduling views land next — for now, manage
-          everything here.
-        </p>
+        <p className="text-sm text-zinc-500">Search and manage every task you&apos;ve ever created.</p>
       </div>
 
       <CreateTaskForm
@@ -53,40 +73,75 @@ function TasksContent() {
         }}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-1">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setStatusTab(tab.value)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                statusTab === tab.value
-                  ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <div className="flex flex-col gap-3">
+        <div className="relative">
+          <input
+            ref={searchInputRef}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tasks…"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          />
+          {!search && (
+            <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-zinc-200 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:border-zinc-700">
+              /
+            </kbd>
+          )}
         </div>
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          <option value="">All categories</option>
-          {categories?.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-1">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setStatusTab(tab.value)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                  statusTab === tab.value
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            >
+              <option value="">All categories</option>
+              {categories?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            >
+              <option value="">All projects</option>
+              {projects?.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
         {isLoading && <p className="p-4 text-sm text-zinc-400">Loading…</p>}
         {!isLoading && filteredTasks.length === 0 && (
-          <p className="p-4 text-sm text-zinc-400">Nothing here yet.</p>
+          <p className="p-4 text-sm text-zinc-400">
+            {search || categoryFilter || projectFilter || statusTab !== "all"
+              ? "Nothing matches those filters."
+              : "Nothing here yet."}
+          </p>
         )}
         {filteredTasks.map((task) => (
           <TaskItem

@@ -13,10 +13,12 @@ import { useCategories } from "@/hooks/use-categories";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useDeleteProject, useProject, useUpdateProject } from "@/hooks/use-projects";
 import { todayISO } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 import { ApiError } from "@/lib/api";
 
 function ProjectDetailContent({ id }: { id: string }) {
   const router = useRouter();
+  const { weekStartsOn } = useSettings();
   const { data, isLoading } = useProject(id);
   const { data: categories } = useCategories();
   const updateProject = useUpdateProject();
@@ -142,7 +144,7 @@ function ProjectDetailContent({ id }: { id: string }) {
                   onClick={() =>
                     updateTask.mutate({
                       id: task.id,
-                      input: { status: "backlog", scheduledDate: null, weekStart: getWeekStart(todayISO()) },
+                      input: { status: "backlog", scheduledDate: null, weekStart: getWeekStart(todayISO(), weekStartsOn) },
                     })
                   }
                   className="text-xs font-medium text-zinc-400 hover:text-zinc-900 dark:hover:text-white"

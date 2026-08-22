@@ -166,8 +166,13 @@ export const api = {
 
   week: (token: string, weekStart: string) => request<WeekResponse>(`/api/week/${weekStart}`, { token }),
 
-  today: (token: string, date?: string) =>
-    request<TodayResponse>(`/api/today${date ? `?date=${date}` : ""}`, { token }),
+  today: (token: string, date?: string, weekStartsOn?: 0 | 1) => {
+    const params = new URLSearchParams();
+    if (date) params.set("date", date);
+    if (weekStartsOn !== undefined) params.set("weekStartsOn", String(weekStartsOn));
+    const qs = params.toString();
+    return request<TodayResponse>(`/api/today${qs ? `?${qs}` : ""}`, { token });
+  },
 
   projects: {
     list: (token: string) => request<{ projects: ProjectWithProgress[] }>("/api/projects", { token }),

@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import type { Category, TaskPriority } from "@todos/shared";
 import type { CreateTaskInput } from "@/lib/api";
+import { useSettings } from "@/lib/settings-context";
 
 interface CreateTaskFormProps {
   categories: Category[];
@@ -10,10 +11,12 @@ interface CreateTaskFormProps {
 }
 
 export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
+  const { defaultDurationMinutes } = useSettings();
   const [title, setTitle] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [dueDate, setDueDate] = useState("");
+  const [estimatedMinutes, setEstimatedMinutes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -22,14 +25,17 @@ export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
     if (!trimmed) return;
     setIsSubmitting(true);
     try {
+      const minutes = estimatedMinutes === "" ? defaultDurationMinutes : Number(estimatedMinutes);
       await onCreate({
         title: trimmed,
         categoryId: categoryId || null,
         priority,
         dueDate: dueDate || null,
+        estimatedMinutes: minutes,
       });
       setTitle("");
       setDueDate("");
+      setEstimatedMinutes("");
     } finally {
       setIsSubmitting(false);
     }
@@ -38,13 +44,13 @@ export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800 sm:flex-row sm:items-center"
+      className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800 sm:flex-row sm:items-center sm:flex-wrap"
     >
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Add a task…"
-        className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+        className="min-w-[10rem] flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
       />
       <select
         value={categoryId}
@@ -72,6 +78,16 @@ export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
         className="rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+      />
+      <input
+        type="number"
+        min={0}
+        step={5}
+        value={estimatedMinutes}
+        onChange={(e) => setEstimatedMinutes(e.target.value)}
+        placeholder={defaultDurationMinutes ? `${defaultDurationMinutes}m` : "Minutes"}
+        title="Estimated duration in minutes"
+        className="w-24 rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
       />
       <button
         type="submit"

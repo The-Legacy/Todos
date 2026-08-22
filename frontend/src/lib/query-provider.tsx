@@ -5,6 +5,12 @@ import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react
 import { ApiError } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
 
+declare module "@tanstack/react-query" {
+  interface Register {
+    mutationMeta: { silent?: boolean };
+  }
+}
+
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
 

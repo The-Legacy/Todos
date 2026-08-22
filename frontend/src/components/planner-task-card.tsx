@@ -71,6 +71,7 @@ export function PlannerTaskCard({
                 {overdue ? "Overdue" : `Due ${task.dueDate}`}
               </span>
             )}
+            {task.estimatedMinutes != null && <span className="text-[11px] text-zinc-400">~{task.estimatedMinutes}m</span>}
           </div>
         </div>
         <button

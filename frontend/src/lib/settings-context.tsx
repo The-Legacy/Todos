@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { WeekStartDay } from "@todos/shared";
 
 const STORAGE_KEY = "todos.preferences";
@@ -15,6 +15,17 @@ const DEFAULT_PREFERENCES: Preferences = {
   defaultDurationMinutes: null,
 };
 
+function readStoredPreferences(): Preferences {
+  if (typeof window === "undefined") return DEFAULT_PREFERENCES;
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (!stored) return DEFAULT_PREFERENCES;
+  try {
+    return { ...DEFAULT_PREFERENCES, ...JSON.parse(stored) };
+  } catch {
+    return DEFAULT_PREFERENCES;
+  }
+}
+
 interface SettingsContextValue extends Preferences {
   setWeekStartsOn: (day: WeekStartDay) => void;
   setDefaultDurationMinutes: (minutes: number | null) => void;
@@ -23,17 +34,7 @@ interface SettingsContextValue extends Preferences {
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
-    try {
-      setPreferences({ ...DEFAULT_PREFERENCES, ...JSON.parse(stored) });
-    } catch {
-      // ignore malformed stored preferences
-    }
-  }, []);
+  const [preferences, setPreferences] = useState<Preferences>(readStoredPreferences);
 
   const persist = useCallback((next: Preferences) => {
     setPreferences(next);

@@ -25,6 +25,7 @@ import { useReorderTasks, useWeek } from "@/hooks/use-week";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import type { WeekResponse } from "@/lib/api";
 import { formatDayLabel, formatWeekRange, todayISO } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 
 function columnFields(columnId: string, weekStart: string): Partial<Task> & { status?: TaskStatus } {
   if (columnId === "backlog") {
@@ -172,7 +173,8 @@ function WeekBoard({ data, categories }: WeekBoardProps) {
 }
 
 function WeekContent() {
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO()));
+  const { weekStartsOn } = useSettings();
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO(), weekStartsOn));
   const { data, isLoading } = useWeek(weekStart);
   const { data: categories } = useCategories();
 
@@ -191,7 +193,7 @@ function WeekContent() {
             ← Prev
           </button>
           <button
-            onClick={() => setWeekStart(getWeekStart(todayISO()))}
+            onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
             className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
             This week

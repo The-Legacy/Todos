@@ -21,6 +21,7 @@ export function useCreateCategory() {
 
   return useMutation({
     mutationFn: (input: CreateCategoryInput) => api.categories.create(token!, input),
+    meta: { silent: true }, // the create form shows its own inline error
     onSuccess: ({ category }) => {
       queryClient.setQueryData<Category[]>(CATEGORIES_KEY, (prev) => [...(prev ?? []), category]);
     },

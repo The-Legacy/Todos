@@ -141,6 +141,24 @@ npm run deploy
 
 ## Project status
 
-Built in phases. Phase 1 (auth, schema, base API, base frontend) is done.
-Task CRUD, the weekly backlog/planning views, projects, and polish land in
-subsequent phases.
+Built in phases, all landed:
+
+1. **Foundation** — auth, schema, base API, base frontend.
+2. **Tasks** — full CRUD, categories, priority, due dates.
+3. **Weekly planning** — backlog, Today/Week/Backlog views, drag-and-drop
+   (`@dnd-kit`) with tap-based fallbacks for mobile.
+4. **Projects** — goals with progress tracking, task association.
+5. **Polish** — dark mode (light/dark/system, `.dark`-class based so it can
+   be toggled independent of OS preference), a mobile bottom nav alongside
+   the desktop top nav, task search/filtering, a global toast for mutation
+   errors (on top of the existing optimistic-update rollback), a
+   configurable week start day and default task duration, and a dismissible
+   first-run onboarding banner.
+
+Recurring tasks (originally scoped as an optional Phase 6) are not built —
+the schema doesn't block adding them later, but there's no UI or backend
+support for recurrence rules yet.
+
+Note: appearance/week-start-day/default-duration preferences are stored in
+`localStorage`, per browser — they don't sync across devices the way task
+data does (which lives in D1 and follows the account everywhere).

@@ -10,9 +10,11 @@ import { useCategories } from "@/hooks/use-categories";
 import { useWeek } from "@/hooks/use-week";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import { formatDayLabel, formatWeekRange, todayISO } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 
 function BacklogContent() {
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO()));
+  const { weekStartsOn } = useSettings();
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO(), weekStartsOn));
   const { data, isLoading } = useWeek(weekStart);
   const { data: categories } = useCategories();
   const createTask = useCreateTask();
@@ -47,7 +49,7 @@ function BacklogContent() {
             ← Prev
           </button>
           <button
-            onClick={() => setWeekStart(getWeekStart(todayISO()))}
+            onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
             className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
             This week

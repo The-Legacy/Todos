@@ -9,6 +9,7 @@ import { useToday } from "@/hooks/use-today";
 import { useProjects } from "@/hooks/use-projects";
 import { CategoryBadge } from "@/components/category-badge";
 import { ProgressBar } from "@/components/progress-bar";
+import { OnboardingBanner } from "@/components/onboarding-banner";
 import { formatDayLabel } from "@/lib/dates";
 import { addDays } from "@todos/shared";
 
@@ -29,6 +30,8 @@ function DashboardContent() {
         <h1 className="text-xl font-semibold">Dashboard</h1>
         <p className="text-sm text-zinc-500">Signed in as {user?.email}</p>
       </div>
+
+      <OnboardingBanner />
 
       <section className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between">

@@ -35,6 +35,7 @@ export function useCreateProject() {
 
   return useMutation({
     mutationFn: (input: CreateProjectInput) => api.projects.create(token!, input),
+    meta: { silent: true }, // the create form shows its own inline error
     onSuccess: () => invalidateProjects(queryClient),
   });
 }

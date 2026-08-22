@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/projects", label: "Projects" },
   { href: "/tasks", label: "Tasks" },
   { href: "/categories", label: "Categories" },
+  { href: "/settings", label: "Settings" },
 ] as const;
 
 export function Nav() {
@@ -25,7 +26,7 @@ export function Nav() {
     <nav className="flex items-center justify-between gap-4 border-b border-zinc-200 px-6 py-3 dark:border-zinc-800">
       <div className="flex min-w-0 items-center gap-6">
         <span className="shrink-0 text-sm font-semibold">Todos</span>
-        <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="hidden items-center gap-1 overflow-x-auto md:flex">
           {LINKS.map((link) => {
             const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (

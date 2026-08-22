@@ -2,6 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
+function readStoredTheme(): Theme {
+  if (typeof window === "undefined") return "system";
+  return (window.localStorage.getItem(THEME_STORAGE_KEY) as Theme | null) ?? "system";
+}
+
 export type Theme = "light" | "dark" | "system";
 
 const THEME_STORAGE_KEY = "todos.theme";
@@ -23,12 +28,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-    if (stored) setThemeState(stored);
-  }, []);
+  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
 
   useEffect(() => {
     applyTheme(theme);

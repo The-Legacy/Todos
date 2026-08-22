@@ -24,6 +24,7 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
     projectId: task.projectId ?? "",
     priority: task.priority,
     dueDate: task.dueDate ?? "",
+    estimatedMinutes: task.estimatedMinutes != null ? String(task.estimatedMinutes) : "",
   });
 
   const category = categories.find((c) => c.id === task.categoryId) ?? null;
@@ -39,6 +40,7 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
       projectId: draft.projectId || null,
       priority: draft.priority,
       dueDate: draft.dueDate || null,
+      estimatedMinutes: draft.estimatedMinutes === "" ? null : Number(draft.estimatedMinutes),
     });
     setIsEditing(false);
   }
@@ -108,6 +110,16 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
                   </option>
                 ))}
               </select>
+              <input
+                type="number"
+                min={0}
+                step={5}
+                value={draft.estimatedMinutes}
+                onChange={(e) => setDraft((d) => ({ ...d, estimatedMinutes: e.target.value }))}
+                placeholder="Minutes"
+                title="Estimated duration in minutes"
+                className="w-24 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+              />
             </div>
             <div className="flex gap-2">
               <button
@@ -136,6 +148,9 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
                   {overdue ? "Overdue " : "Due "}
                   {task.dueDate}
                 </span>
+              )}
+              {task.estimatedMinutes != null && (
+                <span className="text-xs text-zinc-400">~{task.estimatedMinutes}m</span>
               )}
             </div>
             {task.description && <p className="text-xs text-zinc-500">{task.description}</p>}
