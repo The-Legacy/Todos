@@ -6,6 +6,7 @@ import { addDays, getWeekStart } from "@todos/shared";
 import { RequireAuth } from "@/components/require-auth";
 import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useWeek } from "@/hooks/use-week";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
@@ -35,35 +36,37 @@ function BacklogContent() {
   }, [data]);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-9 sm:px-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Backlog</h1>
-          {data && <p className="text-sm text-zinc-500">Week of {formatWeekRange(data.weekStart, data.weekEnd)}</p>}
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display text-2xl font-bold tracking-tight">Backlog</h1>
+          {data && <p className="text-[13.5px] text-text-2">Week of {formatWeekRange(data.weekStart, data.weekEnd)}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="card flex items-center gap-0.5 p-1">
           <button
             onClick={() => setWeekStart((w) => addDays(w, -7))}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            aria-label="Previous week"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-text-2 transition hover:bg-surface-2"
           >
-            ← Prev
+            <ChevronLeftIcon size={15} />
           </button>
           <button
             onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className="rounded-lg bg-surface-2 px-3.5 py-1.5 text-[12.5px] font-semibold"
           >
             This week
           </button>
           <button
             onClick={() => setWeekStart((w) => addDays(w, 7))}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            aria-label="Next week"
+            className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-text-2 transition hover:bg-surface-2"
           >
-            Next →
+            <ChevronRightIcon size={15} />
           </button>
         </div>
       </div>
 
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-text-2">
         Dump everything you might want to do this week here — you don&apos;t need to pick a day yet.
       </p>
 
@@ -74,10 +77,10 @@ function BacklogContent() {
         }}
       />
 
-      {isLoading && <p className="text-sm text-zinc-400">Loading…</p>}
+      {isLoading && <p className="text-sm text-text-3">Loading…</p>}
 
       {data && data.backlog.length === 0 && (
-        <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-400 dark:border-zinc-700">
+        <p className="card border-dashed p-6 text-center text-sm text-text-3">
           Backlog is empty — add tasks above, or pull them in from Week.
         </p>
       )}
@@ -85,8 +88,8 @@ function BacklogContent() {
       {[...grouped.entries()].map(([key, tasks]) => {
         const category = key === "__none__" ? null : categoryById(key);
         return (
-          <section key={key} className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold">{category?.name ?? "No category"}</h2>
+          <section key={key} className="flex flex-col gap-2.5">
+            <h2 className="text-[13px] font-bold">{category?.name ?? "No category"}</h2>
             <div className="flex flex-col gap-2">
               {tasks.map((task) => (
                 <PlannerTaskCard

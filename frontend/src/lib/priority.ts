@@ -7,9 +7,15 @@ export const PRIORITY_LABELS: Record<TaskPriority, string> = {
 };
 
 export const PRIORITY_STYLES: Record<TaskPriority, string> = {
-  low: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
-  medium: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  high: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  low: "bg-surface-2 text-text-3",
+  medium: "bg-amber-tint text-amber",
+  high: "bg-red-tint text-red",
+};
+
+export const PRIORITY_DOT: Record<TaskPriority, string> = {
+  low: "bg-border",
+  medium: "bg-amber",
+  high: "bg-red",
 };
 
 export function isOverdue(dueDate: string | null, status: string): boolean {

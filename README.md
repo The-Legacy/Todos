@@ -139,6 +139,10 @@ data through the API.
 
 ## Deployment
 
+Both the API and the frontend deploy to Cloudflare Workers. You'll need to
+be authenticated first (`npx wrangler login` from either `backend/` or
+`frontend/` — wrangler is a local dependency, not global, so use `npx`).
+
 **Backend:**
 
 ```bash
@@ -148,8 +152,33 @@ npm run db:migrate:remote
 npm run deploy
 ```
 
-**Frontend:** deploy `frontend/` to any Next.js host (e.g. Vercel), setting
-`NEXT_PUBLIC_API_URL` to your deployed Worker's URL.
+Note the `*.workers.dev` URL it prints — the frontend needs it next.
+
+**Frontend:** deploys as a Cloudflare Worker too, via the OpenNext
+Cloudflare adapter (`@opennextjs/cloudflare`), which turns the Next.js App
+Router build into a Workers-compatible bundle (static assets served from
+an `ASSETS` binding, SSR/dynamic routes from a Worker).
+
+```bash
+cd frontend
+cp .env.production.example .env.production.local   # then edit NEXT_PUBLIC_API_URL to your deployed Worker's URL
+npm run cf:build     # runs `next build`, then bundles it for Cloudflare
+npx wrangler deploy  # or: npm run cf:deploy
+```
+
+Important: use `.env.production.local`, not `.env.production` — Next.js
+loads `.env.local` with *higher* priority than `.env.production` (only
+`.env.production.local` outranks `.env.local`), so anything in a plain
+`.env.production` gets silently overridden by the `http://localhost:8787`
+in `.env.local` during a production build.
+
+`NEXT_PUBLIC_*` variables are inlined into the JS bundle at build time —
+they cannot be changed later via Workers environment variables/secrets.
+If you redeploy the backend at a different URL, you must rebuild the
+frontend.
+
+To redeploy after making changes, just re-run `npm run cf:build && npx
+wrangler deploy` in the relevant package.
 
 ## Project status
 

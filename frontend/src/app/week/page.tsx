@@ -20,6 +20,7 @@ import { PlannerColumn } from "@/components/planner-column";
 import { SortableTaskCard } from "@/components/sortable-task-card";
 import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
+import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useReorderTasks, useWeek } from "@/hooks/use-week";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
@@ -41,6 +42,7 @@ interface WeekBoardProps {
 
 function WeekBoard({ data, categories }: WeekBoardProps) {
   const { weekStart } = data;
+  const today = todayISO();
   const reorderTasks = useReorderTasks();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -141,7 +143,14 @@ function WeekBoard({ data, categories }: WeekBoardProps) {
           </PlannerColumn>
 
           {dates.map((date, index) => (
-            <PlannerColumn key={date} id={date} title={formatDayLabel(date, index)} subtitle={`${columns[date]?.length ?? 0}`} tasks={columns[date] ?? []}>
+            <PlannerColumn
+              key={date}
+              id={date}
+              title={formatDayLabel(date, index)}
+              subtitle={`${columns[date]?.length ?? 0}`}
+              tasks={columns[date] ?? []}
+              isToday={date === today}
+            >
               {(columns[date] ?? []).map((task) => (
                 <SortableTaskCard
                   key={task.id}
@@ -179,35 +188,39 @@ function WeekContent() {
   const { data: categories } = useCategories();
 
   return (
-    <div className="flex flex-1 flex-col gap-4 px-4 py-6 sm:px-8">
+    <div className="flex flex-1 flex-col gap-5 px-4 py-7 sm:px-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Week</h1>
-          {data && <p className="text-sm text-zinc-500">{formatWeekRange(data.weekStart, data.weekEnd)}</p>}
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display text-xl font-bold tracking-tight">Week</h1>
+          {data && <p className="text-[13px] text-text-2">{formatWeekRange(data.weekStart, data.weekEnd)}</p>}
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setWeekStart((w) => addDays(w, -7))}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            ← Prev
-          </button>
-          <button
-            onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            This week
-          </button>
-          <button
-            onClick={() => setWeekStart((w) => addDays(w, 7))}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
-            Next →
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="card flex items-center gap-0.5 p-1">
+            <button
+              onClick={() => setWeekStart((w) => addDays(w, -7))}
+              aria-label="Previous week"
+              className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-text-2 transition hover:bg-surface-2"
+            >
+              <ChevronLeftIcon size={15} />
+            </button>
+            <button
+              onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
+              className="rounded-lg bg-surface-2 px-3.5 py-1.5 text-[12.5px] font-semibold"
+            >
+              This week
+            </button>
+            <button
+              onClick={() => setWeekStart((w) => addDays(w, 7))}
+              aria-label="Next week"
+              className="flex h-[30px] w-[30px] items-center justify-center rounded-lg text-text-2 transition hover:bg-surface-2"
+            >
+              <ChevronRightIcon size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {isLoading && <p className="text-sm text-zinc-400">Loading…</p>}
+      {isLoading && <p className="text-sm text-text-3">Loading…</p>}
       {data && <WeekBoard key={data.weekStart} data={data} categories={categories ?? []} />}
     </div>
   );

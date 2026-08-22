@@ -35,10 +35,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={toast.id}
             role="alert"
-            className={`pointer-events-auto w-full max-w-sm animate-[toast-in_150ms_ease-out] rounded-lg px-4 py-3 text-sm shadow-lg ${
-              toast.tone === "error"
-                ? "bg-red-600 text-white"
-                : "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+            className={`pointer-events-auto w-full max-w-sm animate-[toast-in_150ms_ease-out] rounded-[10px] px-4 py-3 text-sm font-medium shadow-lg ${
+              toast.tone === "error" ? "bg-red text-white" : "bg-text text-bg"
             }`}
           >
             {toast.message}

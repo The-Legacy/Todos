@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { RequireAuth } from "@/components/require-auth";
 import { ProgressBar } from "@/components/progress-bar";
+import { PlusIcon } from "@/components/icons";
 import { PROJECT_STATUS_LABELS, PROJECT_STATUS_STYLES } from "@/lib/project-status";
 import { useCreateProject, useProjects } from "@/hooks/use-projects";
 import { ApiError } from "@/lib/api";
@@ -29,27 +30,19 @@ function CreateProjectForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800 sm:flex-row sm:items-center">
+    <form onSubmit={handleSubmit} className="card flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="New project or goal…"
-        className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+        className="field flex-1"
       />
-      <input
-        type="date"
-        value={targetDate}
-        onChange={(e) => setTargetDate(e.target.value)}
-        className="rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      />
-      <button
-        type="submit"
-        disabled={createProject.isPending || !name.trim()}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900"
-      >
+      <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} className="field" />
+      <button type="submit" disabled={createProject.isPending || !name.trim()} className="btn-primary">
+        <PlusIcon size={15} strokeWidth={2.4} />
         Add
       </button>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red">{error}</p>}
     </form>
   );
 }
@@ -58,10 +51,10 @@ function ProjectsContent() {
   const { data: projects, isLoading } = useProjects();
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-10">
-      <div>
-        <h1 className="text-xl font-semibold">Projects</h1>
-        <p className="text-sm text-zinc-500">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-6 py-9 sm:px-10">
+      <div className="flex flex-col gap-1">
+        <h1 className="font-display text-2xl font-bold tracking-tight">Projects</h1>
+        <p className="text-[13.5px] text-text-2">
           Longer-term goals, separate from weekly planning. Break them into tasks and pull those into a
           week whenever you&apos;re ready to work on them.
         </p>
@@ -69,29 +62,23 @@ function ProjectsContent() {
 
       <CreateProjectForm />
 
-      {isLoading && <p className="text-sm text-zinc-400">Loading…</p>}
+      {isLoading && <p className="text-sm text-text-3">Loading…</p>}
       {!isLoading && projects?.length === 0 && (
-        <p className="rounded-lg border border-dashed border-zinc-300 p-6 text-center text-sm text-zinc-400 dark:border-zinc-700">
-          No projects yet — add one above.
-        </p>
+        <p className="card border-dashed p-6 text-center text-sm text-text-3">No projects yet — add one above.</p>
       )}
 
       <div className="flex flex-col gap-3">
         {projects?.map((project) => (
-          <Link
-            key={project.id}
-            href={`/projects/${project.id}`}
-            className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-4 transition hover:border-zinc-400 dark:border-zinc-800 dark:hover:border-zinc-600"
-          >
+          <Link key={project.id} href={`/projects/${project.id}`} className="card flex flex-col gap-2.5 p-4 hover:border-text-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium">{project.name}</span>
-              <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${PROJECT_STATUS_STYLES[project.status]}`}>
+              <span className="text-[13.5px] font-semibold">{project.name}</span>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${PROJECT_STATUS_STYLES[project.status]}`}>
                 {PROJECT_STATUS_LABELS[project.status]}
               </span>
             </div>
-            {project.targetDate && <p className="text-xs text-zinc-400">Target: {project.targetDate}</p>}
+            {project.targetDate && <p className="text-xs text-text-3">Target: {project.targetDate}</p>}
             <ProgressBar progress={project.progress} />
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-text-3">
               {project.taskCounts.completed}/{project.taskCounts.total} tasks complete
             </p>
           </Link>

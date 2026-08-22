@@ -8,7 +8,7 @@ export function useWeek(weekStart: string) {
   return useQuery({
     queryKey: ["week", weekStart],
     queryFn: () => api.week(token!, weekStart),
-    enabled: !!token,
+    enabled: !!token && !!weekStart,
   });
 }
 

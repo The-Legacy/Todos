@@ -12,75 +12,66 @@ const THEME_OPTIONS: Array<{ value: Theme; label: string }> = [
   { value: "system", label: "System" },
 ];
 
+function SegmentedButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex-1 rounded-[10px] border px-3 py-2 text-sm font-semibold transition ${
+        active ? "border-accent bg-accent-tint text-accent" : "border-border text-text-2 hover:bg-surface-2"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 function SettingsContent() {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { weekStartsOn, setWeekStartsOn, defaultDurationMinutes, setDefaultDurationMinutes } = useSettings();
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-8 px-6 py-10">
-      <div>
-        <h1 className="text-xl font-semibold">Settings</h1>
-        <p className="text-sm text-zinc-500">Preferences are saved to this browser.</p>
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-7 px-6 py-9 sm:px-10">
+      <div className="flex flex-col gap-1">
+        <h1 className="font-display text-2xl font-bold tracking-tight">Settings</h1>
+        <p className="text-[13.5px] text-text-2">Preferences are saved to this browser.</p>
       </div>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Account</h2>
-        <div className="rounded-lg border border-zinc-200 p-4 text-sm dark:border-zinc-800">
-          <p className="text-zinc-500">Signed in as</p>
-          <p className="font-medium">{user?.email}</p>
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-[13px] font-bold">Account</h2>
+        <div className="card p-4 text-sm">
+          <p className="text-text-2">Signed in as</p>
+          <p className="font-semibold">{user?.email}</p>
         </div>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Appearance</h2>
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-[13px] font-bold">Appearance</h2>
         <div className="flex gap-2">
           {THEME_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setTheme(opt.value)}
-              className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
-                theme === opt.value
-                  ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900"
-                  : "border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              }`}
-            >
+            <SegmentedButton key={opt.value} active={theme === opt.value} onClick={() => setTheme(opt.value)}>
               {opt.label}
-            </button>
+            </SegmentedButton>
           ))}
         </div>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Week start day</h2>
-        <p className="text-xs text-zinc-500">Controls how Today, Week, and Backlog group your weeks.</p>
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-[13px] font-bold">Week start day</h2>
+        <p className="text-xs text-text-3">Controls how Today, Week, and Backlog group your weeks.</p>
         <div className="flex gap-2">
-          <button
-            onClick={() => setWeekStartsOn(1)}
-            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
-              weekStartsOn === 1
-                ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900"
-                : "border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            }`}
-          >
+          <SegmentedButton active={weekStartsOn === 1} onClick={() => setWeekStartsOn(1)}>
             Monday
-          </button>
-          <button
-            onClick={() => setWeekStartsOn(0)}
-            className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition ${
-              weekStartsOn === 0
-                ? "border-zinc-900 bg-zinc-900 text-white dark:border-white dark:bg-white dark:text-zinc-900"
-                : "border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            }`}
-          >
+          </SegmentedButton>
+          <SegmentedButton active={weekStartsOn === 0} onClick={() => setWeekStartsOn(0)}>
             Sunday
-          </button>
+          </SegmentedButton>
         </div>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Default task duration</h2>
-        <p className="text-xs text-zinc-500">Pre-fills the estimated duration when you add a new task.</p>
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-[13px] font-bold">Default task duration</h2>
+        <p className="text-xs text-text-3">Pre-fills the estimated duration when you add a new task.</p>
         <div className="flex items-center gap-2">
           <input
             type="number"
@@ -89,25 +80,19 @@ function SettingsContent() {
             value={defaultDurationMinutes ?? ""}
             onChange={(e) => setDefaultDurationMinutes(e.target.value === "" ? null : Number(e.target.value))}
             placeholder="None"
-            className="w-32 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+            className="field w-32"
           />
-          <span className="text-sm text-zinc-500">minutes</span>
+          <span className="text-sm text-text-2">minutes</span>
         </div>
       </section>
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold">Categories &amp; recurring tasks</h2>
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-[13px] font-bold">Categories &amp; recurring tasks</h2>
         <div className="flex gap-2">
-          <Link
-            href="/categories"
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
+          <Link href="/categories" className="btn-secondary">
             Manage categories →
           </Link>
-          <Link
-            href="/recurring"
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-          >
+          <Link href="/recurring" className="btn-secondary">
             Manage recurring tasks →
           </Link>
         </div>

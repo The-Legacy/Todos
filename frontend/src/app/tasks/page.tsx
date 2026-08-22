@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskItem } from "@/components/task-item";
+import { SearchIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useProjects } from "@/hooks/use-projects";
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from "@/hooks/use-tasks";
@@ -60,10 +61,10 @@ function TasksContent() {
   }, [tasks, statusTab, categoryFilter, projectFilter, search]);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10">
-      <div>
-        <h1 className="text-xl font-semibold">Tasks</h1>
-        <p className="text-sm text-zinc-500">Search and manage every task you&apos;ve ever created.</p>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-9 sm:px-10">
+      <div className="flex flex-col gap-1">
+        <h1 className="font-display text-2xl font-bold tracking-tight">Tasks</h1>
+        <p className="text-[13.5px] text-text-2">Search and manage every task you&apos;ve ever created.</p>
       </div>
 
       <CreateTaskForm
@@ -75,15 +76,16 @@ function TasksContent() {
 
       <div className="flex flex-col gap-3">
         <div className="relative">
+          <SearchIcon size={15} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-3" />
           <input
             ref={searchInputRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search tasks…"
-            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+            className="field w-full pl-9"
           />
           {!search && (
-            <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-zinc-200 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:border-zinc-700">
+            <kbd className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md border border-border px-1.5 py-0.5 text-[10px] text-text-3">
               /
             </kbd>
           )}
@@ -95,10 +97,8 @@ function TasksContent() {
               <button
                 key={tab.value}
                 onClick={() => setStatusTab(tab.value)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                  statusTab === tab.value
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className={`rounded-[9px] px-3 py-1.5 text-[13px] font-semibold transition ${
+                  statusTab === tab.value ? "bg-accent-tint text-accent" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 {tab.label}
@@ -106,11 +106,7 @@ function TasksContent() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-            >
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="field py-1.5">
               <option value="">All categories</option>
               {categories?.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -118,11 +114,7 @@ function TasksContent() {
                 </option>
               ))}
             </select>
-            <select
-              value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-              className="rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-            >
+            <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)} className="field py-1.5">
               <option value="">All projects</option>
               {projects?.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -134,10 +126,10 @@ function TasksContent() {
         </div>
       </div>
 
-      <div className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-        {isLoading && <p className="p-4 text-sm text-zinc-400">Loading…</p>}
+      <div className="card flex flex-col divide-y divide-border-soft">
+        {isLoading && <p className="p-4 text-sm text-text-3">Loading…</p>}
         {!isLoading && filteredTasks.length === 0 && (
-          <p className="p-4 text-sm text-zinc-400">
+          <p className="p-4 text-sm text-text-3">
             {search || categoryFilter || projectFilter || statusTab !== "all"
               ? "Nothing matches those filters."
               : "Nothing here yet."}

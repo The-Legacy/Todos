@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Category, Project, Task, TaskPriority } from "@todos/shared";
 import { CategoryBadge } from "@/components/category-badge";
 import { PRIORITY_LABELS, PRIORITY_STYLES, isOverdue } from "@/lib/priority";
+import { CheckIcon, RecurringIcon } from "@/components/icons";
 import type { UpdateTaskInput } from "@/lib/api";
 
 interface TaskItemProps {
@@ -46,14 +47,17 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
   }
 
   return (
-    <div className={`flex flex-col gap-2 p-3 ${completed ? "opacity-50" : ""}`}>
+    <div className={`flex flex-col gap-2 p-3.5 ${completed ? "opacity-50" : ""}`}>
       <div className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={completed}
-          onChange={(e) => onUpdate({ status: e.target.checked ? "completed" : "backlog" })}
-          className="mt-1 h-4 w-4 shrink-0 accent-zinc-900 dark:accent-white"
-        />
+        <button
+          onClick={() => onUpdate({ status: completed ? "backlog" : "completed" })}
+          aria-label={completed ? "Mark incomplete" : "Mark complete"}
+          className={`mt-0.5 flex h-[19px] w-[19px] shrink-0 items-center justify-center rounded-[6px] border transition ${
+            completed ? "border-accent bg-accent text-accent-ink" : "border-border hover:border-text-3"
+          }`}
+        >
+          {completed && <CheckIcon size={12} strokeWidth={3} />}
+        </button>
 
         {isEditing ? (
           <div className="flex flex-1 flex-col gap-2">
@@ -61,20 +65,20 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
               autoFocus
               value={draft.title}
               onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm outline-none dark:border-zinc-700 dark:bg-zinc-900"
+              className="field"
             />
             <textarea
               value={draft.description}
               onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
               placeholder="Notes"
               rows={2}
-              className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm outline-none dark:border-zinc-700 dark:bg-zinc-900"
+              className="field"
             />
             <div className="flex flex-wrap items-center gap-2">
               <select
                 value={draft.categoryId}
                 onChange={(e) => setDraft((d) => ({ ...d, categoryId: e.target.value }))}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="field"
               >
                 <option value="">No category</option>
                 {categories.map((c) => (
@@ -86,7 +90,7 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
               <select
                 value={draft.priority}
                 onChange={(e) => setDraft((d) => ({ ...d, priority: e.target.value as TaskPriority }))}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="field"
               >
                 <option value="low">Low priority</option>
                 <option value="medium">Medium priority</option>
@@ -96,12 +100,12 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
                 type="date"
                 value={draft.dueDate}
                 onChange={(e) => setDraft((d) => ({ ...d, dueDate: e.target.value }))}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="field"
               />
               <select
                 value={draft.projectId}
                 onChange={(e) => setDraft((d) => ({ ...d, projectId: e.target.value }))}
-                className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="field"
               >
                 <option value="">No project</option>
                 {projects.map((p) => (
@@ -118,54 +122,43 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
                 onChange={(e) => setDraft((d) => ({ ...d, estimatedMinutes: e.target.value }))}
                 placeholder="Minutes"
                 title="Estimated duration in minutes"
-                className="w-24 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="field w-24"
               />
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={saveEdit}
-                className="rounded-md bg-zinc-900 px-3 py-1 text-xs font-medium text-white dark:bg-white dark:text-zinc-900"
-              >
+              <button onClick={saveEdit} className="btn-primary px-3 py-1 text-xs">
                 Save
               </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="rounded-md border border-zinc-300 px-3 py-1 text-xs font-medium dark:border-zinc-700"
-              >
+              <button onClick={() => setIsEditing(false)} className="btn-secondary px-3 py-1 text-xs">
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex flex-1 flex-col gap-1">
+          <div className="flex flex-1 flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className={`text-sm font-medium ${completed ? "line-through" : ""}`}>{task.title}</span>
               {task.recurringTaskId && (
-                <span aria-label="Recurring task" title="Recurring task" className="text-zinc-300 dark:text-zinc-600">
-                  ↻
+                <span aria-label="Recurring task" title="Recurring task" className="text-text-3/70">
+                  <RecurringIcon size={12} strokeWidth={2.2} />
                 </span>
               )}
-              <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${PRIORITY_STYLES[task.priority]}`}>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${PRIORITY_STYLES[task.priority]}`}>
                 {PRIORITY_LABELS[task.priority]}
               </span>
               {task.dueDate && (
-                <span className={`text-xs ${overdue ? "font-medium text-red-600 dark:text-red-400" : "text-zinc-400"}`}>
+                <span className={`text-xs ${overdue ? "font-semibold text-red" : "text-text-3"}`}>
                   {overdue ? "Overdue " : "Due "}
                   {task.dueDate}
                 </span>
               )}
-              {task.estimatedMinutes != null && (
-                <span className="text-xs text-zinc-400">~{task.estimatedMinutes}m</span>
-              )}
+              {task.estimatedMinutes != null && <span className="text-xs text-text-3">~{task.estimatedMinutes}m</span>}
             </div>
-            {task.description && <p className="text-xs text-zinc-500">{task.description}</p>}
+            {task.description && <p className="text-xs text-text-2">{task.description}</p>}
             <div className="flex flex-wrap items-center gap-2">
               <CategoryBadge category={category} />
               {project && (
-                <Link
-                  href={`/projects/${project.id}`}
-                  className="text-xs text-zinc-400 underline hover:text-zinc-900 dark:hover:text-white"
-                >
+                <Link href={`/projects/${project.id}`} className="text-xs text-text-3 underline hover:text-text">
                   {project.name}
                 </Link>
               )}
@@ -174,17 +167,11 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
         )}
 
         {!isEditing && (
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-xs font-medium text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-            >
+          <div className="flex shrink-0 items-center gap-3">
+            <button onClick={() => setIsEditing(true)} className="text-xs font-semibold text-text-3 hover:text-text">
               Edit
             </button>
-            <button
-              onClick={onDelete}
-              className="text-xs font-medium text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
-            >
+            <button onClick={onDelete} className="text-xs font-semibold text-text-3 hover:text-red">
               Delete
             </button>
           </div>

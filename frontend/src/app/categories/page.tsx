@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { RequireAuth } from "@/components/require-auth";
+import { PlusIcon } from "@/components/icons";
 import {
   useCategories,
   useCreateCategory,
@@ -59,27 +60,19 @@ function CategoriesContent() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-6 py-10">
-      <div>
-        <h1 className="text-xl font-semibold">Categories</h1>
-        <p className="text-sm text-zinc-500">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-7 px-6 py-9 sm:px-10">
+      <div className="flex flex-col gap-1">
+        <h1 className="font-display text-2xl font-bold tracking-tight">Categories</h1>
+        <p className="text-[13.5px] text-text-2">
           Organize tasks by category. Deleting a category keeps its tasks — they just lose the tag.
         </p>
       </div>
 
-      <form onSubmit={handleCreate} className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+      <form onSubmit={handleCreate} className="card flex flex-col gap-3.5 p-4">
         <div className="flex gap-2">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="New category name"
-            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
-          />
-          <button
-            type="submit"
-            disabled={createCategory.isPending || !name.trim()}
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900"
-          >
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="New category name" className="field flex-1" />
+          <button type="submit" disabled={createCategory.isPending || !name.trim()} className="btn-primary">
+            <PlusIcon size={15} strokeWidth={2.4} />
             Add
           </button>
         </div>
@@ -90,23 +83,21 @@ function CategoriesContent() {
               type="button"
               onClick={() => setColor(swatch)}
               aria-label={`Use color ${swatch}`}
-              className={`h-6 w-6 rounded-full ring-offset-2 ring-offset-white transition dark:ring-offset-zinc-950 ${
-                color === swatch ? "ring-2 ring-zinc-900 dark:ring-white" : ""
+              className={`h-6 w-6 rounded-full ring-offset-2 ring-offset-surface transition ${
+                color === swatch ? "ring-2 ring-text" : ""
               }`}
               style={{ backgroundColor: swatch }}
             />
           ))}
         </div>
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red">{error}</p>}
       </form>
 
-      <div className="flex flex-col divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-        {isLoading && <p className="p-4 text-sm text-zinc-400">Loading…</p>}
-        {!isLoading && categories?.length === 0 && (
-          <p className="p-4 text-sm text-zinc-400">No categories yet — add one above.</p>
-        )}
+      <div className="card flex flex-col divide-y divide-border-soft">
+        {isLoading && <p className="p-4 text-sm text-text-3">Loading…</p>}
+        {!isLoading && categories?.length === 0 && <p className="p-4 text-sm text-text-3">No categories yet — add one above.</p>}
         {categories?.map((category) => (
-          <div key={category.id} className="flex items-center justify-between gap-3 p-3">
+          <div key={category.id} className="flex items-center justify-between gap-3 p-3.5">
             <div className="flex items-center gap-3">
               <span className="h-3 w-3 rounded-full" style={{ backgroundColor: category.color }} />
               {editingId === category.id ? (
@@ -119,13 +110,10 @@ function CategoriesContent() {
                     if (e.key === "Enter") commitEdit(category.id);
                     if (e.key === "Escape") setEditingId(null);
                   }}
-                  className="rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm outline-none dark:border-zinc-700 dark:bg-zinc-900"
+                  className="field py-1"
                 />
               ) : (
-                <button
-                  onClick={() => startEditing(category.id, category.name)}
-                  className="text-sm font-medium hover:underline"
-                >
+                <button onClick={() => startEditing(category.id, category.name)} className="text-[13.5px] font-medium hover:underline">
                   {category.name}
                 </button>
               )}
@@ -138,17 +126,12 @@ function CategoriesContent() {
                     type="button"
                     onClick={() => updateCategory.mutate({ id: category.id, input: { color: swatch } })}
                     aria-label={`Set ${category.name} to ${swatch}`}
-                    className={`h-4 w-4 rounded-full transition ${
-                      category.color === swatch ? "ring-2 ring-zinc-900 dark:ring-white" : ""
-                    }`}
+                    className={`h-4 w-4 rounded-full transition ${category.color === swatch ? "ring-2 ring-text" : ""}`}
                     style={{ backgroundColor: swatch }}
                   />
                 ))}
               </div>
-              <button
-                onClick={() => deleteCategory.mutate(category.id)}
-                className="text-sm text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
-              >
+              <button onClick={() => deleteCategory.mutate(category.id)} className="text-sm font-medium text-text-3 hover:text-red">
                 Delete
               </button>
             </div>

@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { QueryProvider } from "@/lib/query-provider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme-context";
 import { SettingsProvider } from "@/lib/settings-context";
 import { ToastProvider } from "@/lib/toast-context";
-import { Nav } from "@/components/nav";
+import { Sidebar } from "@/components/sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -29,19 +30,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${manrope.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+      <body className="flex min-h-full flex-col bg-bg font-sans text-text">
         <ToastProvider>
           <QueryProvider>
             <AuthProvider>
               <ThemeProvider>
                 <SettingsProvider>
-                  <Nav />
-                  <div className="flex flex-1 flex-col pb-16 md:pb-0">{children}</div>
+                  <div className="flex min-h-full flex-1">
+                    <Sidebar />
+                    <div className="flex min-w-0 flex-1 flex-col pb-16 md:pb-0">{children}</div>
+                  </div>
                   <BottomNav />
                 </SettingsProvider>
               </ThemeProvider>

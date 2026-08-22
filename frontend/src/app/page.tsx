@@ -13,7 +13,5 @@ export default function Home() {
     router.replace(user ? "/dashboard" : "/login");
   }, [isLoading, user, router]);
 
-  return (
-    <div className="flex flex-1 items-center justify-center text-sm text-zinc-400">Loading…</div>
-  );
+  return <div className="flex flex-1 items-center justify-center text-sm text-text-3">Loading…</div>;
 }

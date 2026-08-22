@@ -8,5 +8,9 @@ dist/
 .DS_Store
 .env
 .env.local
+.env.production
+.env.production.local
+!.env.production.example
 .turbo/
 coverage/
+.open-next/

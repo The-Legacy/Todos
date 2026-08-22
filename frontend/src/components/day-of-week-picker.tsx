@@ -22,10 +22,8 @@ export function DayOfWeekPicker({ value, onChange }: DayOfWeekPickerProps) {
             type="button"
             onClick={() => toggle(day)}
             aria-pressed={active}
-            className={`h-8 w-8 rounded-full text-xs font-medium transition ${
-              active
-                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                : "border border-zinc-300 text-zinc-500 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
+            className={`h-8 w-8 rounded-full text-xs font-semibold transition ${
+              active ? "bg-accent text-accent-ink" : "border border-border text-text-2 hover:bg-surface-2"
             }`}
           >
             {label[0]}

@@ -1,12 +1,12 @@
 name = "todos-api"
 main = "src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-08-22"
 compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"
 database_name = "todos-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "93c90210-1ba1-477f-b96b-f7f748f4f460"
 migrations_dir = "migrations"
 
 [vars]

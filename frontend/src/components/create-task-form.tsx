@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import type { Category, TaskPriority } from "@todos/shared";
 import type { CreateTaskInput } from "@/lib/api";
 import { useSettings } from "@/lib/settings-context";
+import { PlusIcon } from "@/components/icons";
 
 interface CreateTaskFormProps {
   categories: Category[];
@@ -42,21 +43,14 @@ export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800 sm:flex-row sm:items-center sm:flex-wrap"
-    >
+    <form onSubmit={handleSubmit} className="card flex flex-col gap-2 p-3 sm:flex-row sm:flex-wrap sm:items-center">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Add a task…"
-        className="min-w-[10rem] flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+        className="field min-w-40 flex-1"
       />
-      <select
-        value={categoryId}
-        onChange={(e) => setCategoryId(e.target.value)}
-        className="rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      >
+      <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="field">
         <option value="">No category</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
@@ -64,21 +58,12 @@ export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
           </option>
         ))}
       </select>
-      <select
-        value={priority}
-        onChange={(e) => setPriority(e.target.value as TaskPriority)}
-        className="rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      >
+      <select value={priority} onChange={(e) => setPriority(e.target.value as TaskPriority)} className="field">
         <option value="low">Low</option>
         <option value="medium">Medium</option>
         <option value="high">High</option>
       </select>
-      <input
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-        className="rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      />
+      <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="field" />
       <input
         type="number"
         min={0}
@@ -87,13 +72,10 @@ export function CreateTaskForm({ categories, onCreate }: CreateTaskFormProps) {
         onChange={(e) => setEstimatedMinutes(e.target.value)}
         placeholder={defaultDurationMinutes ? `${defaultDurationMinutes}m` : "Minutes"}
         title="Estimated duration in minutes"
-        className="w-24 rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="field w-24"
       />
-      <button
-        type="submit"
-        disabled={isSubmitting || !title.trim()}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900"
-      >
+      <button type="submit" disabled={isSubmitting || !title.trim()} className="btn-primary">
+        <PlusIcon size={15} strokeWidth={2.4} />
         Add
       </button>
     </form>

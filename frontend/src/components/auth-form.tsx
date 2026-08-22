@@ -30,7 +30,7 @@ export function AuthForm({ mode, onSubmit }: AuthFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+        <label htmlFor="email" className="text-sm font-medium text-text-2">
           Email
         </label>
         <input
@@ -40,11 +40,11 @@ export function AuthForm({ mode, onSubmit }: AuthFormProps) {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="field"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+        <label htmlFor="password" className="text-sm font-medium text-text-2">
           Password
         </label>
         <input
@@ -55,15 +55,11 @@ export function AuthForm({ mode, onSubmit }: AuthFormProps) {
           autoComplete={mode === "login" ? "current-password" : "new-password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="field"
         />
       </div>
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:opacity-50 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-      >
+      {error && <p className="text-sm text-red">{error}</p>}
+      <button type="submit" disabled={isSubmitting} className="btn-primary py-2.5">
         {isSubmitting ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
       </button>
     </form>
