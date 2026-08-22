@@ -2,7 +2,10 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { AppVariables } from "./types/env";
 import auth from "./routes/auth";
-import { requireAuth } from "./middleware/requireAuth";
+import categories from "./routes/categories";
+import tasks from "./routes/tasks";
+import week from "./routes/week";
+import today from "./routes/today";
 
 const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
@@ -19,15 +22,10 @@ app.get("/api/health", (c) => c.json({ ok: true }));
 
 app.route("/api/auth", auth);
 
-app.get("/api/categories", requireAuth, async (c) => {
-  const userId = c.get("userId");
-  const { results } = await c.env.DB.prepare(
-    "SELECT id, user_id as userId, name, color, created_at as createdAt FROM categories WHERE user_id = ? ORDER BY created_at ASC",
-  )
-    .bind(userId)
-    .all();
-  return c.json({ categories: results });
-});
+app.route("/api/categories", categories);
+app.route("/api/tasks", tasks);
+app.route("/api/week", week);
+app.route("/api/today", today);
 
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 

@@ -1,4 +1,4 @@
-import type { AuthResponse, Category } from "@todos/shared";
+import type { AuthResponse, Category, Task, TaskPriority, TaskStatus } from "@todos/shared";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
 
@@ -31,6 +31,84 @@ async function request<T>(path: string, options: RequestInit & { token?: string 
   return res.json() as Promise<T>;
 }
 
+export interface CreateCategoryInput {
+  name: string;
+  color: string;
+}
+
+export interface UpdateCategoryInput {
+  name?: string;
+  color?: string;
+}
+
+export interface CreateTaskInput {
+  title: string;
+  description?: string | null;
+  categoryId?: string | null;
+  projectId?: string | null;
+  priority?: TaskPriority;
+  status?: TaskStatus;
+  dueDate?: string | null;
+  scheduledDate?: string | null;
+  weekStart?: string | null;
+  estimatedMinutes?: number | null;
+}
+
+export interface UpdateTaskInput {
+  title?: string;
+  description?: string | null;
+  categoryId?: string | null;
+  projectId?: string | null;
+  priority?: TaskPriority;
+  status?: TaskStatus;
+  dueDate?: string | null;
+  scheduledDate?: string | null;
+  weekStart?: string | null;
+  estimatedMinutes?: number | null;
+  position?: number;
+}
+
+export interface TaskFilters {
+  status?: TaskStatus;
+  categoryId?: string;
+  projectId?: string;
+  scheduledDate?: string;
+  weekStart?: string;
+  q?: string;
+}
+
+export interface ReorderUpdate {
+  id: string;
+  position: number;
+  status?: TaskStatus;
+  scheduledDate?: string | null;
+  weekStart?: string | null;
+}
+
+export interface WeekResponse {
+  weekStart: string;
+  weekEnd: string;
+  days: Record<string, Task[]>;
+  backlog: Task[];
+}
+
+export interface TodayResponse {
+  date: string;
+  weekStart: string;
+  today: Task[];
+  overdue: Task[];
+  backlog: Task[];
+}
+
+function toQueryString(filters: TaskFilters = {}): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value) params.set(key, value);
+  }
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
+
 export const api = {
   signup: (email: string, password: string) =>
     request<AuthResponse>("/api/auth/signup", { method: "POST", body: JSON.stringify({ email, password }) }),
@@ -42,5 +120,33 @@ export const api = {
 
   me: (token: string) => request<{ user: AuthResponse["user"] }>("/api/auth/me", { token }),
 
-  categories: (token: string) => request<{ categories: Category[] }>("/api/categories", { token }),
+  categories: {
+    list: (token: string) => request<{ categories: Category[] }>("/api/categories", { token }),
+    create: (token: string, input: CreateCategoryInput) =>
+      request<{ category: Category }>("/api/categories", { method: "POST", token, body: JSON.stringify(input) }),
+    update: (token: string, id: string, input: UpdateCategoryInput) =>
+      request<{ category: Category }>(`/api/categories/${id}`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify(input),
+      }),
+    remove: (token: string, id: string) => request<void>(`/api/categories/${id}`, { method: "DELETE", token }),
+  },
+
+  tasks: {
+    list: (token: string, filters?: TaskFilters) =>
+      request<{ tasks: Task[] }>(`/api/tasks${toQueryString(filters)}`, { token }),
+    create: (token: string, input: CreateTaskInput) =>
+      request<{ task: Task }>("/api/tasks", { method: "POST", token, body: JSON.stringify(input) }),
+    update: (token: string, id: string, input: UpdateTaskInput) =>
+      request<{ task: Task }>(`/api/tasks/${id}`, { method: "PATCH", token, body: JSON.stringify(input) }),
+    remove: (token: string, id: string) => request<void>(`/api/tasks/${id}`, { method: "DELETE", token }),
+    reorder: (token: string, updates: ReorderUpdate[]) =>
+      request<{ tasks: Task[] }>("/api/tasks/reorder", { method: "POST", token, body: JSON.stringify({ updates }) }),
+  },
+
+  week: (token: string, weekStart: string) => request<WeekResponse>(`/api/week/${weekStart}`, { token }),
+
+  today: (token: string, date?: string) =>
+    request<TodayResponse>(`/api/today${date ? `?date=${date}` : ""}`, { token }),
 };

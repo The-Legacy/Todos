@@ -65,3 +65,28 @@ export const DEFAULT_CATEGORIES: Array<{ name: string; color: string }> = [
   { name: "Personal", color: "#22c55e" },
   { name: "Errands", color: "#eab308" },
 ];
+
+/** Days are represented as "YYYY-MM-DD" strings throughout; all arithmetic is done in UTC to avoid
+ * timezone-shift bugs when a date string crosses midnight in the user's local time. */
+
+export function addDays(dateISO: string, days: number): string {
+  const d = new Date(`${dateISO}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Returns the Monday of the week containing `dateISO`. */
+export function getWeekStart(dateISO: string): string {
+  const d = new Date(`${dateISO}T00:00:00Z`);
+  const day = d.getUTCDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  return addDays(dateISO, mondayOffset);
+}
+
+export function getWeekDates(weekStart: string): string[] {
+  return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+}
+
+export function isValidDateString(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
