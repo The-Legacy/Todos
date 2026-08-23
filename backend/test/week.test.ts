@@ -119,22 +119,39 @@ describe("today", () => {
     expect(body.overdue).toHaveLength(0);
   });
 
-  it("respects weekStartsOn=0 (Sunday) when grouping this week's backlog", async () => {
+  it("still computes weekStart correctly for weekStartsOn=0 (Sunday), independent of the backlog", async () => {
     const { token } = await signup("today-c@example.com");
-    // 2026-08-23 is a Sunday; with a Sunday week start, 2026-08-25 (Tuesday) falls in the
-    // week that starts 2026-08-23, not the Monday-based week (2026-08-24).
-    await authed(token, "/api/tasks", {
-      method: "POST",
-      body: JSON.stringify({ title: "Sunday-week backlog item", weekStart: "2026-08-23" }),
-    });
 
     const mondayBased = await (await authed(token, "/api/today?date=2026-08-25")).json<any>();
     expect(mondayBased.weekStart).toBe(MONDAY);
-    expect(mondayBased.backlog).toHaveLength(0);
 
+    // 2026-08-23 is a Sunday; with a Sunday week start, 2026-08-25 (Tuesday) falls in the
+    // week that starts 2026-08-23, not the Monday-based week (2026-08-24).
     const sundayBased = await (await authed(token, "/api/today?date=2026-08-25&weekStartsOn=0")).json<any>();
     expect(sundayBased.weekStart).toBe("2026-08-23");
-    expect(sundayBased.backlog.map((t: any) => t.title)).toEqual(["Sunday-week backlog item"]);
+  });
+
+  it("the backlog is global: it shows up regardless of week start day, an old weekStart tag, or having no weekStart at all", async () => {
+    const { token } = await signup("today-d@example.com");
+
+    // No weekStart at all.
+    await authed(token, "/api/tasks", { method: "POST", body: JSON.stringify({ title: "No week tag" }) });
+    // Tagged with a week that has nothing to do with the date being viewed below — this is
+    // exactly the "leftover from three weeks ago" case that used to make a task disappear.
+    await authed(token, "/api/tasks", {
+      method: "POST",
+      body: JSON.stringify({ title: "Stale week tag", weekStart: "2026-07-06" }),
+    });
+
+    const monday = await (await authed(token, "/api/today?date=2026-08-25")).json<any>();
+    expect(monday.backlog.map((t: any) => t.title).sort()).toEqual(["No week tag", "Stale week tag"]);
+
+    const sunday = await (await authed(token, "/api/today?date=2026-08-25&weekStartsOn=0")).json<any>();
+    expect(sunday.backlog.map((t: any) => t.title).sort()).toEqual(["No week tag", "Stale week tag"]);
+
+    // And it shows up the same way from the Week board's perspective, for a totally unrelated week.
+    const farFutureWeek = await (await authed(token, "/api/week/2027-01-04")).json<any>();
+    expect(farFutureWeek.backlog.map((t: any) => t.title).sort()).toEqual(["No week tag", "Stale week tag"]);
   });
 });
 

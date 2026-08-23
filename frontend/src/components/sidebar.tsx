@@ -45,6 +45,7 @@ function NavLink({
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={`flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13.5px] transition ${
         active ? "bg-accent-tint font-semibold text-accent" : "font-medium text-text-2 hover:bg-surface-2"
       }`}
@@ -65,7 +66,10 @@ export function Sidebar() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <aside className="hidden w-[248px] shrink-0 flex-col gap-1 border-r border-border bg-surface px-3.5 py-5 md:flex">
+    <nav
+      aria-label="Primary"
+      className="hidden w-[248px] shrink-0 flex-col gap-1 border-r border-border bg-surface px-3.5 py-5 md:flex"
+    >
       <div className="flex items-center gap-2.5 px-1.5 pb-5">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-ink">
           <CheckIcon size={16} />
@@ -107,6 +111,6 @@ export function Sidebar() {
           <LogoutIcon size={16} />
         </button>
       </div>
-    </aside>
+    </nav>
   );
 }

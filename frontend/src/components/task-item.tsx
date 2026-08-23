@@ -25,6 +25,7 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
     projectId: task.projectId ?? "",
     priority: task.priority,
     dueDate: task.dueDate ?? "",
+    scheduledDate: task.scheduledDate ?? "",
     estimatedMinutes: task.estimatedMinutes != null ? String(task.estimatedMinutes) : "",
   });
 
@@ -41,6 +42,7 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
       projectId: draft.projectId || null,
       priority: draft.priority,
       dueDate: draft.dueDate || null,
+      scheduledDate: draft.scheduledDate || null,
       estimatedMinutes: draft.estimatedMinutes === "" ? null : Number(draft.estimatedMinutes),
     });
     setIsEditing(false);
@@ -100,6 +102,14 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
                 type="date"
                 value={draft.dueDate}
                 onChange={(e) => setDraft((d) => ({ ...d, dueDate: e.target.value }))}
+                title="Due date"
+                className="field"
+              />
+              <input
+                type="date"
+                value={draft.scheduledDate}
+                onChange={(e) => setDraft((d) => ({ ...d, scheduledDate: e.target.value }))}
+                title="Scheduled date"
                 className="field"
               />
               <select
@@ -152,6 +162,7 @@ export function TaskItem({ task, categories, projects, onUpdate, onDelete }: Tas
                   {task.dueDate}
                 </span>
               )}
+              {task.scheduledDate && <span className="text-xs text-text-3">Scheduled {task.scheduledDate}</span>}
               {task.estimatedMinutes != null && <span className="text-xs text-text-3">~{task.estimatedMinutes}m</span>}
             </div>
             {task.description && <p className="text-xs text-text-2">{task.description}</p>}

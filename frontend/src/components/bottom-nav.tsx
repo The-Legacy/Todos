@@ -20,7 +20,11 @@ export function BottomNav() {
   if (!user) return null;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-surface/95 backdrop-blur md:hidden">
+    <nav
+      aria-label="Primary"
+      className="transform-gpu fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
+      style={{ willChange: "transform" }}
+    >
       {LINKS.map((link) => {
         const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
         const Icon = link.icon;
@@ -28,7 +32,8 @@ export function BottomNav() {
           <Link
             key={link.href}
             href={link.href}
-            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition ${
+            aria-current={active ? "page" : undefined}
+            className={`flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition ${
               active ? "text-accent" : "text-text-3"
             }`}
           >

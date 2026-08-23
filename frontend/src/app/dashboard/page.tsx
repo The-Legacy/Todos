@@ -171,7 +171,7 @@ function DashboardContent() {
           </Link>
         </div>
         <div className="grid grid-cols-7 gap-2.5">
-          {weekDates.map((date, i) => {
+          {weekDates.map((date) => {
             const isToday = date === data?.date;
             const hasTasks = (week?.days[date]?.length ?? 0) > 0;
             return (
@@ -183,10 +183,10 @@ function DashboardContent() {
                 }`}
               >
                 <span className={`text-[11px] font-semibold ${isToday ? "text-accent-ink/70" : "text-text-3"}`}>
-                  {formatDayLabel(date, i).split(" ")[0]}
+                  {formatDayLabel(date).split(" ")[0]}
                 </span>
                 <span className={`text-sm font-semibold ${isToday ? "text-accent-ink" : ""}`}>
-                  {formatDayLabel(date, i).split(" ")[1]}
+                  {formatDayLabel(date).split(" ")[1]}
                 </span>
                 <span
                   className={`h-1 w-1 rounded-full ${
@@ -202,7 +202,7 @@ function DashboardContent() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <section className="flex flex-col gap-2.5">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-[15px] font-bold">Weekly backlog</h2>
+            <h2 className="text-[15px] font-bold">Backlog</h2>
             <Link href="/backlog" className="text-[12.5px] font-semibold text-text-3 hover:text-text">
               Open Backlog →
             </Link>

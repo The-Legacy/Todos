@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
+import type { Task } from "@todos/shared";
 import { RequireAuth } from "@/components/require-auth";
 import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
+import { TaskEditModal } from "@/components/task-edit-modal";
 import { PlusIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
+import { useProjects } from "@/hooks/use-projects";
 import { useToday } from "@/hooks/use-today";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import { todayISO } from "@/lib/dates";
@@ -13,9 +17,11 @@ function TodayContent() {
   const date = todayISO();
   const { data, isLoading } = useToday(date);
   const { data: categories } = useCategories();
+  const { data: projects } = useProjects();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const categoryById = (id: string | null) => categories?.find((c) => c.id === id) ?? null;
 
@@ -48,6 +54,7 @@ function TodayContent() {
                     category={categoryById(task.categoryId)}
                     onToggleComplete={() => updateTask.mutate({ id: task.id, input: { status: "completed" } })}
                     onDelete={() => deleteTask.mutate(task.id)}
+                    onEdit={() => setEditingTask(task)}
                     primaryAction={{
                       label: "Reschedule to today",
                       onClick: () => updateTask.mutate({ id: task.id, input: { scheduledDate: date } }),
@@ -84,12 +91,13 @@ function TodayContent() {
                       })
                     }
                     onDelete={() => deleteTask.mutate(task.id)}
+                    onEdit={() => setEditingTask(task)}
                     primaryAction={{
                       label: "Move to backlog",
                       onClick: () =>
                         updateTask.mutate({
                           id: task.id,
-                          input: { status: "backlog", scheduledDate: null, weekStart: data.weekStart },
+                          input: { status: "backlog", scheduledDate: null },
                         }),
                     }}
                   />
@@ -102,7 +110,7 @@ function TodayContent() {
         {data && (
           <div className="card flex w-full flex-col gap-3 p-4 lg:sticky lg:top-6 lg:w-[340px] lg:shrink-0">
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-bold">This week&apos;s backlog</span>
+              <span className="text-[13px] font-bold">Backlog</span>
               <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-semibold text-text-3">
                 {data.backlog.length}
               </span>
@@ -111,12 +119,17 @@ function TodayContent() {
             <div className="flex flex-col gap-2">
               {data.backlog.map((task) => (
                 <div key={task.id} className="flex items-center gap-2.5 rounded-[11px] border border-border-soft p-2.5">
-                  <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">{task.title}</span>
+                  <button
+                    onClick={() => setEditingTask(task)}
+                    className="min-w-0 flex-1 truncate text-left text-[12.5px] font-medium hover:underline"
+                  >
+                    {task.title}
+                  </button>
                   <button
                     onClick={() =>
                       updateTask.mutate({
                         id: task.id,
-                        input: { status: "scheduled", scheduledDate: date, weekStart: null },
+                        input: { status: "scheduled", scheduledDate: date },
                       })
                     }
                     aria-label="Add to today"
@@ -130,6 +143,17 @@ function TodayContent() {
           </div>
         )}
       </div>
+
+      {editingTask && (
+        <TaskEditModal
+          task={editingTask}
+          categories={categories ?? []}
+          projects={projects ?? []}
+          onSave={(input) => updateTask.mutate({ id: editingTask.id, input })}
+          onDelete={() => deleteTask.mutate(editingTask.id)}
+          onClose={() => setEditingTask(null)}
+        />
+      )}
     </div>
   );
 }

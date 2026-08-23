@@ -47,12 +47,14 @@ today.get("/", async (c) => {
     )
       .bind(userId, date)
       .all(),
+    // The backlog is global, not tied to any one week — an unscheduled task should keep showing
+    // up here every week until it's scheduled or completed, not just the week it was created in.
     c.env.DB.prepare(
       `SELECT ${TASK_COLUMNS} FROM tasks
-       WHERE user_id = ? AND status = 'backlog' AND week_start = ?
+       WHERE user_id = ? AND status = 'backlog'
        ORDER BY position ASC, created_at ASC`,
     )
-      .bind(userId, weekStart)
+      .bind(userId)
       .all(),
   ]);
 

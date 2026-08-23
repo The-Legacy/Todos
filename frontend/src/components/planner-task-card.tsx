@@ -4,13 +4,14 @@ import type { HTMLAttributes } from "react";
 import type { Category, Task } from "@todos/shared";
 import { CategoryBadge } from "@/components/category-badge";
 import { isOverdue, PRIORITY_DOT } from "@/lib/priority";
-import { CheckIcon, DragHandleIcon, RecurringIcon, XIcon } from "@/components/icons";
+import { CheckIcon, DragHandleIcon, EditIcon, RecurringIcon, XIcon } from "@/components/icons";
 
 interface PlannerTaskCardProps {
   task: Task;
   category: Category | null | undefined;
   onToggleComplete: () => void;
   onDelete: () => void;
+  onEdit?: () => void;
   moveOptions?: Array<{ label: string; value: string }>;
   onMove?: (value: string) => void;
   primaryAction?: { label: string; onClick: () => void };
@@ -23,6 +24,7 @@ export function PlannerTaskCard({
   category,
   onToggleComplete,
   onDelete,
+  onEdit,
   moveOptions,
   onMove,
   primaryAction,
@@ -51,11 +53,11 @@ export function PlannerTaskCard({
         <button
           onClick={onToggleComplete}
           aria-label={completed ? "Mark incomplete" : "Mark complete"}
-          className={`mt-0.5 flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[5px] border transition ${
+          className={`flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[6px] border transition ${
             completed ? "border-accent bg-accent text-accent-ink" : "border-border hover:border-text-3"
           }`}
         >
-          {completed && <CheckIcon size={11} strokeWidth={3} />}
+          {completed && <CheckIcon size={12} strokeWidth={3} />}
         </button>
         <div className="flex flex-1 flex-col gap-1">
           <div className="flex items-center gap-1.5">
@@ -77,13 +79,24 @@ export function PlannerTaskCard({
             {task.estimatedMinutes != null && <span className="text-[11px] text-text-3">~{task.estimatedMinutes}m</span>}
           </div>
         </div>
-        <button
-          onClick={onDelete}
-          aria-label="Delete task"
-          className="shrink-0 text-text-3/60 transition hover:text-red"
-        >
-          <XIcon size={13} strokeWidth={2.2} />
-        </button>
+        <div className="-mr-2 flex shrink-0 items-center gap-4">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              aria-label="Edit task"
+              className="-m-2 p-2 text-text-3/60 transition hover:text-accent"
+            >
+              <EditIcon size={13} strokeWidth={2.2} />
+            </button>
+          )}
+          <button
+            onClick={onDelete}
+            aria-label="Delete task"
+            className="-m-2 p-2 text-text-3/60 transition hover:text-red"
+          >
+            <XIcon size={13} strokeWidth={2.2} />
+          </button>
+        </div>
       </div>
       {(primaryAction || (moveOptions && onMove)) && (
         <div className="flex items-center gap-2 pl-[27px]">

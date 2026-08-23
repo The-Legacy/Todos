@@ -165,6 +165,15 @@ export function XIcon(props: IconProps) {
   );
 }
 
+export function EditIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 20h4.2L19.6 8.6a1.5 1.5 0 0 0 0-2.1L18.5 5.4a1.5 1.5 0 0 0-2.1 0L4.9 16.3z" />
+      <path d="M14.5 7.5l2.5 2.5" />
+    </svg>
+  );
+}
+
 export function SearchIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

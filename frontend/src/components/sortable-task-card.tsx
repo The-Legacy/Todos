@@ -10,6 +10,7 @@ interface SortableTaskCardProps {
   category: Category | null | undefined;
   onToggleComplete: () => void;
   onDelete: () => void;
+  onEdit?: () => void;
   moveOptions?: Array<{ label: string; value: string }>;
   onMove?: (value: string) => void;
 }

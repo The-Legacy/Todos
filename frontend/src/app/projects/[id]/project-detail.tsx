@@ -4,7 +4,6 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ProjectStatus } from "@todos/shared";
-import { getWeekStart } from "@todos/shared";
 import { RequireAuth } from "@/components/require-auth";
 import { ProgressBar } from "@/components/progress-bar";
 import { CategoryBadge } from "@/components/category-badge";
@@ -14,12 +13,10 @@ import { useCategories } from "@/hooks/use-categories";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useDeleteProject, useProject, useUpdateProject } from "@/hooks/use-projects";
 import { todayISO } from "@/lib/dates";
-import { useSettings } from "@/lib/settings-context";
 import { ApiError } from "@/lib/api";
 
 function ProjectDetailContent({ id }: { id: string }) {
   const router = useRouter();
-  const { weekStartsOn } = useSettings();
   const { data, isLoading } = useProject(id);
   const { data: categories } = useCategories();
   const updateProject = useUpdateProject();
@@ -130,7 +127,7 @@ function ProjectDetailContent({ id }: { id: string }) {
                   onClick={() =>
                     updateTask.mutate({
                       id: task.id,
-                      input: { status: "scheduled", scheduledDate: todayISO(), weekStart: null },
+                      input: { status: "scheduled", scheduledDate: todayISO() },
                     })
                   }
                   className="text-xs font-semibold text-text-3 hover:text-text"
@@ -142,12 +139,12 @@ function ProjectDetailContent({ id }: { id: string }) {
                   onClick={() =>
                     updateTask.mutate({
                       id: task.id,
-                      input: { status: "backlog", scheduledDate: null, weekStart: getWeekStart(todayISO(), weekStartsOn) },
+                      input: { status: "backlog", scheduledDate: null },
                     })
                   }
                   className="text-xs font-semibold text-text-3 hover:text-text"
                 >
-                  Add to this week&apos;s backlog
+                  Add to backlog
                 </button>
               )}
               <button onClick={() => deleteTask.mutate(task.id)} className="text-xs font-semibold text-text-3 hover:text-red">

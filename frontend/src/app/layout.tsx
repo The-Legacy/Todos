@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
@@ -25,6 +25,12 @@ export const metadata: Metadata = {
   description: "Personal weekly task planner",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -43,7 +49,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <SettingsProvider>
                   <div className="flex min-h-full flex-1">
                     <Sidebar />
-                    <div className="flex min-w-0 flex-1 flex-col pb-16 md:pb-0">{children}</div>
+                    <div className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+                      {children}
+                    </div>
                   </div>
                   <BottomNav />
                 </SettingsProvider>
