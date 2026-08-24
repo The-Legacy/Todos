@@ -8,6 +8,7 @@ import week from "./routes/week";
 import today from "./routes/today";
 import projects from "./routes/projects";
 import recurringTasks from "./routes/recurring-tasks";
+import taskTemplates from "./routes/task-templates";
 
 const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
@@ -30,6 +31,7 @@ app.route("/api/week", week);
 app.route("/api/today", today);
 app.route("/api/projects", projects);
 app.route("/api/recurring-tasks", recurringTasks);
+app.route("/api/task-templates", taskTemplates);
 
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 

@@ -11,10 +11,11 @@ interface PlannerColumnProps {
   tasks: Task[];
   highlight?: boolean;
   isToday?: boolean;
+  headerAction?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function PlannerColumn({ id, title, subtitle, tasks, highlight, isToday, children }: PlannerColumnProps) {
+export function PlannerColumn({ id, title, subtitle, tasks, highlight, isToday, headerAction, children }: PlannerColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
@@ -34,15 +35,18 @@ export function PlannerColumn({ id, title, subtitle, tasks, highlight, isToday, 
         <span className={`text-[12.5px] font-bold ${isToday ? "text-accent" : highlight ? "text-accent" : ""}`}>
           {title}
         </span>
-        {subtitle && (
-          <span
-            className={`rounded-full px-1.5 text-[11px] font-bold ${
-              isToday ? "bg-accent text-accent-ink" : "text-text-3"
-            }`}
-          >
-            {subtitle}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {subtitle && (
+            <span
+              className={`rounded-full px-1.5 text-[11px] font-bold ${
+                isToday ? "bg-accent text-accent-ink" : "text-text-3"
+              }`}
+            >
+              {subtitle}
+            </span>
+          )}
+          {headerAction}
+        </div>
       </div>
       <SortableContext id={id} items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className="flex min-h-12 flex-col gap-1.5">

@@ -13,7 +13,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import type { Category, Project, Task, TaskStatus } from "@todos/shared";
+import type { Category, Project, Task, TaskStatus, TaskTemplate } from "@todos/shared";
 import { addDays, getWeekStart } from "@todos/shared";
 import { RequireAuth } from "@/components/require-auth";
 import { PlannerColumn } from "@/components/planner-column";
@@ -21,6 +21,7 @@ import { SortableTaskCard } from "@/components/sortable-task-card";
 import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskEditModal } from "@/components/task-edit-modal";
+import { TemplateQuickAdd } from "@/components/template-quick-add";
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useProjects } from "@/hooks/use-projects";
@@ -166,6 +167,18 @@ function WeekBoard({ data, categories, projects }: WeekBoardProps) {
 
   const categoryById = (id: string | null) => categories.find((c) => c.id === id) ?? null;
 
+  async function applyTemplate(template: TaskTemplate, destColumn: string) {
+    const { task } = await createTask.mutateAsync({
+      title: template.title,
+      categoryId: template.categoryId,
+      projectId: template.projectId,
+      priority: template.priority,
+      estimatedMinutes: template.estimatedMinutes,
+      ...columnFields(destColumn),
+    });
+    setColumns((prev) => ({ ...prev, [destColumn]: [...(prev[destColumn] ?? []), task] }));
+  }
+
   return (
     <>
       <CreateTaskForm
@@ -179,7 +192,14 @@ function WeekBoard({ data, categories, projects }: WeekBoardProps) {
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 [&>*]:snap-start">
-          <PlannerColumn id="backlog" title="Backlog" subtitle={`${columns.backlog?.length ?? 0}`} tasks={columns.backlog ?? []} highlight>
+          <PlannerColumn
+            id="backlog"
+            title="Backlog"
+            subtitle={`${columns.backlog?.length ?? 0}`}
+            tasks={columns.backlog ?? []}
+            highlight
+            headerAction={<TemplateQuickAdd onApply={(t) => applyTemplate(t, "backlog")} />}
+          >
             {(columns.backlog ?? []).map((task) => (
               <SortableTaskCard
                 key={task.id}
@@ -202,6 +222,7 @@ function WeekBoard({ data, categories, projects }: WeekBoardProps) {
               subtitle={`${columns[date]?.length ?? 0}`}
               tasks={columns[date] ?? []}
               isToday={date === today}
+              headerAction={<TemplateQuickAdd onApply={(t) => applyTemplate(t, date)} />}
             >
               {(columns[date] ?? []).map((task) => (
                 <SortableTaskCard

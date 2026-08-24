@@ -7,6 +7,7 @@ import type {
   Task,
   TaskPriority,
   TaskStatus,
+  TaskTemplate,
 } from "@todos/shared";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
@@ -153,6 +154,24 @@ export interface UpdateRecurringTaskInput {
   active?: boolean;
 }
 
+export interface CreateTaskTemplateInput {
+  title: string;
+  description?: string | null;
+  categoryId?: string | null;
+  projectId?: string | null;
+  priority?: TaskPriority;
+  estimatedMinutes?: number | null;
+}
+
+export interface UpdateTaskTemplateInput {
+  title?: string;
+  description?: string | null;
+  categoryId?: string | null;
+  projectId?: string | null;
+  priority?: TaskPriority;
+  estimatedMinutes?: number | null;
+}
+
 function toQueryString(filters: TaskFilters = {}): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {
@@ -238,5 +257,22 @@ export const api = {
         body: JSON.stringify(input),
       }),
     remove: (token: string, id: string) => request<void>(`/api/recurring-tasks/${id}`, { method: "DELETE", token }),
+  },
+
+  taskTemplates: {
+    list: (token: string) => request<{ taskTemplates: TaskTemplate[] }>("/api/task-templates", { token }),
+    create: (token: string, input: CreateTaskTemplateInput) =>
+      request<{ taskTemplate: TaskTemplate }>("/api/task-templates", {
+        method: "POST",
+        token,
+        body: JSON.stringify(input),
+      }),
+    update: (token: string, id: string, input: UpdateTaskTemplateInput) =>
+      request<{ taskTemplate: TaskTemplate }>(`/api/task-templates/${id}`, {
+        method: "PATCH",
+        token,
+        body: JSON.stringify(input),
+      }),
+    remove: (token: string, id: string) => request<void>(`/api/task-templates/${id}`, { method: "DELETE", token }),
   },
 };

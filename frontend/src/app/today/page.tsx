@@ -6,6 +6,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskEditModal } from "@/components/task-edit-modal";
+import { CommonTasksPanel } from "@/components/common-tasks-panel";
 import { PlusIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useProjects } from "@/hooks/use-projects";
@@ -107,8 +108,26 @@ function TodayContent() {
           )}
         </div>
 
+        <div className="flex w-full flex-col gap-6 lg:sticky lg:top-6 lg:w-[340px] lg:shrink-0">
+          <CommonTasksPanel
+            categories={categories ?? []}
+            projects={projects ?? []}
+            applyLabel="Add to today"
+            onApply={(template) =>
+              createTask.mutateAsync({
+                title: template.title,
+                categoryId: template.categoryId,
+                projectId: template.projectId,
+                priority: template.priority,
+                estimatedMinutes: template.estimatedMinutes,
+                status: "scheduled",
+                scheduledDate: date,
+              })
+            }
+          />
+
         {data && (
-          <div className="card flex w-full flex-col gap-3 p-4 lg:sticky lg:top-6 lg:w-[340px] lg:shrink-0">
+          <div className="card flex w-full flex-col gap-3 p-4">
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-bold">Backlog</span>
               <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-semibold text-text-3">
@@ -142,6 +161,7 @@ function TodayContent() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {editingTask && (

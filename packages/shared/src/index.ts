@@ -69,6 +69,19 @@ export interface RecurringTask {
   updatedAt: string;
 }
 
+export interface TaskTemplate {
+  id: string;
+  userId: string;
+  categoryId: string | null;
+  projectId: string | null;
+  title: string;
+  description: string | null;
+  priority: TaskPriority;
+  estimatedMinutes: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;
