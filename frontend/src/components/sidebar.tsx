@@ -8,6 +8,7 @@ import {
   CategoriesIcon,
   CheckIcon,
   DashboardIcon,
+  FitnessIcon,
   LogoutIcon,
   ProjectsIcon,
   RecurringIcon,
@@ -22,6 +23,7 @@ const PLAN_LINKS = [
   { href: "/today", label: "Today", icon: TodayIcon },
   { href: "/week", label: "Week", icon: WeekIcon },
   { href: "/backlog", label: "Backlog", icon: BacklogIcon },
+  { href: "/fitness", label: "Fitness", icon: FitnessIcon },
 ] as const;
 
 const ORGANIZE_LINKS = [

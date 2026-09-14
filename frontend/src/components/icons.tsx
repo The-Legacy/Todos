@@ -69,6 +69,14 @@ export function RecurringIcon(props: IconProps) {
   );
 }
 
+export function FitnessIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M6.5 8.5v7M17.5 8.5v7M3.5 10.2v3.6M20.5 10.2v3.6M6.5 12h11" />
+    </svg>
+  );
+}
+
 export function TasksIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

@@ -12,10 +12,11 @@ interface PlannerColumnProps {
   highlight?: boolean;
   isToday?: boolean;
   headerAction?: React.ReactNode;
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function PlannerColumn({ id, title, subtitle, tasks, highlight, isToday, headerAction, children }: PlannerColumnProps) {
+export function PlannerColumn({ id, title, subtitle, tasks, highlight, isToday, headerAction, footer, children }: PlannerColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
@@ -58,6 +59,7 @@ export function PlannerColumn({ id, title, subtitle, tasks, highlight, isToday, 
           )}
         </div>
       </SortableContext>
+      {footer}
     </div>
   );
 }

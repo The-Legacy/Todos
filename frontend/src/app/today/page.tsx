@@ -7,6 +7,7 @@ import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskEditModal } from "@/components/task-edit-modal";
 import { CommonTasksPanel } from "@/components/common-tasks-panel";
+import { DayWorkoutsCard } from "@/components/day-workouts-card";
 import { PlusIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useProjects } from "@/hooks/use-projects";
@@ -127,6 +128,8 @@ function TodayContent() {
               })
             }
           />
+
+          <DayWorkoutsCard date={date} />
 
         {data && (
           <div className="card flex w-full flex-col gap-3 p-4">

@@ -5,6 +5,28 @@ import { requireAuth } from "../middleware/requireAuth";
 import type { TaskPriority } from "@todos/shared";
 import { daysOfWeekToMask, isValidDateString, maskToDaysOfWeek } from "@todos/shared";
 
+function resolveToday(c: { req: { query: (key: string) => string | undefined } }): string | { error: string } {
+  const today = c.req.query("today");
+  if (today === undefined) return new Date().toISOString().slice(0, 10);
+  if (!isValidDateString(today)) return { error: "today must be an ISO date (YYYY-MM-DD)" };
+  return today;
+}
+
+/**
+ * Removes not-yet-completed instances this rule already generated for `today` or later. Called
+ * whenever a rule is paused or deleted so "stopping" a recurring task actually clears it off
+ * future days instead of leaving already-materialized instances behind. Past and completed
+ * instances are left alone as history.
+ */
+async function clearFutureOpenInstances(db: D1Database, recurringTaskId: string, today: string): Promise<void> {
+  await db
+    .prepare(
+      `DELETE FROM tasks WHERE recurring_task_id = ? AND status != 'completed' AND scheduled_date >= ?`,
+    )
+    .bind(recurringTaskId, today)
+    .run();
+}
+
 const recurringTasks = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 recurringTasks.use("*", requireAuth);
 
@@ -194,6 +216,12 @@ recurringTasks.patch("/:id", async (c) => {
     values.push(body.projectId);
   }
 
+  if (body.active === false) {
+    const today = resolveToday(c);
+    if (typeof today !== "string") return c.json(today, 400);
+    await clearFutureOpenInstances(c.env.DB, id, today);
+  }
+
   if (updates.length > 0) {
     updates.push("updated_at = datetime('now')");
     await c.env.DB.prepare(`UPDATE recurring_tasks SET ${updates.join(", ")} WHERE id = ? AND user_id = ?`)
@@ -216,7 +244,11 @@ recurringTasks.delete("/:id", async (c) => {
     return c.json({ error: "Not found" }, 404);
   }
 
-  // Already-generated task instances keep existing via ON DELETE SET NULL.
+  const today = resolveToday(c);
+  if (typeof today !== "string") return c.json(today, 400);
+  await clearFutureOpenInstances(c.env.DB, id, today);
+
+  // Remaining (past or completed) generated instances keep existing via ON DELETE SET NULL.
   await c.env.DB.prepare("DELETE FROM recurring_tasks WHERE id = ? AND user_id = ?").bind(id, userId).run();
   return c.body(null, 204);
 });

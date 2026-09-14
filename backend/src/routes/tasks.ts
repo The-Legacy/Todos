@@ -340,6 +340,34 @@ tasks.patch("/:id", async (c) => {
   return c.json({ task });
 });
 
+tasks.delete("/", async (c) => {
+  const userId = c.get("userId");
+  const scope = c.req.query("scope");
+
+  if (scope !== "upcoming" && scope !== "all") {
+    return c.json({ error: "scope must be 'upcoming' or 'all'" }, 400);
+  }
+
+  if (scope === "all") {
+    await c.env.DB.prepare("DELETE FROM tasks WHERE user_id = ?").bind(userId).run();
+    return c.body(null, 204);
+  }
+
+  const today = c.req.query("today") ?? new Date().toISOString().slice(0, 10);
+  if (!isValidDate(today)) {
+    return c.json({ error: "today must be an ISO date (YYYY-MM-DD)" }, 400);
+  }
+
+  // "Upcoming": everything not yet done — backlog items (no date) plus anything scheduled today
+  // or later. Completed and past-due tasks are left in place as history.
+  await c.env.DB.prepare(
+    `DELETE FROM tasks WHERE user_id = ? AND status != 'completed' AND (status = 'backlog' OR scheduled_date >= ?)`,
+  )
+    .bind(userId, today)
+    .run();
+  return c.body(null, 204);
+});
+
 tasks.delete("/:id", async (c) => {
   const userId = c.get("userId");
   const id = c.req.param("id");

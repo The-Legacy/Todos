@@ -1,6 +1,7 @@
 import type {
   AuthResponse,
   Category,
+  MuscleGroup,
   Project,
   ProjectStatus,
   RecurringTask,
@@ -8,6 +9,8 @@ import type {
   TaskPriority,
   TaskStatus,
   TaskTemplate,
+  Workout,
+  WorkoutType,
 } from "@todos/shared";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
@@ -154,6 +157,31 @@ export interface UpdateRecurringTaskInput {
   active?: boolean;
 }
 
+export interface WorkoutFilters {
+  date?: string;
+  from?: string;
+  to?: string;
+  type?: WorkoutType;
+}
+
+export interface CreateWorkoutInput {
+  type: WorkoutType;
+  date: string;
+  durationMinutes?: number | null;
+  distanceMiles?: number | null;
+  muscleGroup?: MuscleGroup | null;
+  notes?: string | null;
+}
+
+export interface UpdateWorkoutInput {
+  type?: WorkoutType;
+  date?: string;
+  durationMinutes?: number | null;
+  distanceMiles?: number | null;
+  muscleGroup?: MuscleGroup | null;
+  notes?: string | null;
+}
+
 export interface CreateTaskTemplateInput {
   title: string;
   description?: string | null;
@@ -215,6 +243,11 @@ export const api = {
     remove: (token: string, id: string) => request<void>(`/api/tasks/${id}`, { method: "DELETE", token }),
     reorder: (token: string, updates: ReorderUpdate[]) =>
       request<{ tasks: Task[] }>("/api/tasks/reorder", { method: "POST", token, body: JSON.stringify({ updates }) }),
+    reset: (token: string, scope: "upcoming" | "all", today?: string) => {
+      const params = new URLSearchParams({ scope });
+      if (today) params.set("today", today);
+      return request<void>(`/api/tasks?${params.toString()}`, { method: "DELETE", token });
+    },
   },
 
   week: (token: string, weekStart: string) => request<WeekResponse>(`/api/week/${weekStart}`, { token }),
@@ -250,13 +283,34 @@ export const api = {
         token,
         body: JSON.stringify(input),
       }),
-    update: (token: string, id: string, input: UpdateRecurringTaskInput) =>
-      request<{ recurringTask: RecurringTask }>(`/api/recurring-tasks/${id}`, {
+    update: (token: string, id: string, input: UpdateRecurringTaskInput, today?: string) => {
+      const qs = today ? `?today=${today}` : "";
+      return request<{ recurringTask: RecurringTask }>(`/api/recurring-tasks/${id}${qs}`, {
         method: "PATCH",
         token,
         body: JSON.stringify(input),
-      }),
-    remove: (token: string, id: string) => request<void>(`/api/recurring-tasks/${id}`, { method: "DELETE", token }),
+      });
+    },
+    remove: (token: string, id: string, today?: string) => {
+      const qs = today ? `?today=${today}` : "";
+      return request<void>(`/api/recurring-tasks/${id}${qs}`, { method: "DELETE", token });
+    },
+  },
+
+  workouts: {
+    list: (token: string, filters?: WorkoutFilters) => {
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(filters ?? {})) {
+        if (value) params.set(key, value);
+      }
+      const qs = params.toString();
+      return request<{ workouts: Workout[] }>(`/api/workouts${qs ? `?${qs}` : ""}`, { token });
+    },
+    create: (token: string, input: CreateWorkoutInput) =>
+      request<{ workout: Workout }>("/api/workouts", { method: "POST", token, body: JSON.stringify(input) }),
+    update: (token: string, id: string, input: UpdateWorkoutInput) =>
+      request<{ workout: Workout }>(`/api/workouts/${id}`, { method: "PATCH", token, body: JSON.stringify(input) }),
+    remove: (token: string, id: string) => request<void>(`/api/workouts/${id}`, { method: "DELETE", token }),
   },
 
   taskTemplates: {

@@ -102,6 +102,56 @@ describe("recurring tasks CRUD", () => {
     expect(generated.recurringTaskId).toBeNull();
   });
 
+  it("pausing a rule clears its future, not-yet-completed instances but keeps past ones", async () => {
+    const { token } = await signup("rec-pause@example.com");
+    const created = await (
+      await authed(token, "/api/recurring-tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "Standup", daysOfWeek: [1, 3, 5], startDate: MON }),
+      })
+    ).json<any>();
+
+    // Materialize Mon/Wed/Fri, then complete Monday's instance before pausing.
+    await authed(token, `/api/week/${MON}`);
+    const before = await (await authed(token, "/api/tasks")).json<any>();
+    const monTask = before.tasks.find((t: any) => t.scheduledDate === MON);
+    await authed(token, `/api/tasks/${monTask.id}`, { method: "PATCH", body: JSON.stringify({ status: "completed" }) });
+
+    // Pretend "today" is Wednesday when pausing.
+    const pause = await authed(token, `/api/recurring-tasks/${created.recurringTask.id}?today=${WED}`, {
+      method: "PATCH",
+      body: JSON.stringify({ active: false }),
+    });
+    expect(pause.status).toBe(200);
+
+    const after = await (await authed(token, "/api/tasks")).json<any>();
+    const dates = after.tasks.map((t: any) => t.scheduledDate).sort();
+    // Monday (completed) is kept; Wednesday and Friday (today or later, still open) are removed.
+    expect(dates).toEqual([MON]);
+  });
+
+  it("deleting a rule clears its future, not-yet-completed instances but keeps past/completed ones", async () => {
+    const { token } = await signup("rec-del@example.com");
+    const created = await (
+      await authed(token, "/api/recurring-tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "Trash night 2", daysOfWeek: [1, 3, 5], startDate: MON }),
+      })
+    ).json<any>();
+
+    await authed(token, `/api/week/${MON}`);
+
+    const del = await authed(token, `/api/recurring-tasks/${created.recurringTask.id}?today=${WED}`, {
+      method: "DELETE",
+    });
+    expect(del.status).toBe(204);
+
+    const { tasks } = await (await authed(token, "/api/tasks")).json<any>();
+    const remaining = tasks.filter((t: any) => t.title === "Trash night 2");
+    expect(remaining.map((t: any) => t.scheduledDate)).toEqual([MON]);
+    expect(remaining[0].recurringTaskId).toBeNull();
+  });
+
   it("does not let one user read, modify, or delete another user's recurring task", async () => {
     const alice = await signup("rec-e1@example.com");
     const bob = await signup("rec-e2@example.com");

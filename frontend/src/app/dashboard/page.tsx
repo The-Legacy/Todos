@@ -9,10 +9,11 @@ import { useUpdateTask } from "@/hooks/use-tasks";
 import { useToday } from "@/hooks/use-today";
 import { useWeek } from "@/hooks/use-week";
 import { useProjects } from "@/hooks/use-projects";
+import { useWorkouts } from "@/hooks/use-workouts";
 import { CategoryBadge } from "@/components/category-badge";
 import { ProgressBar } from "@/components/progress-bar";
 import { OnboardingBanner } from "@/components/onboarding-banner";
-import { CheckIcon, TodayIcon, WeekIcon, BacklogIcon, ProjectsIcon } from "@/components/icons";
+import { CheckIcon, TodayIcon, WeekIcon, BacklogIcon, ProjectsIcon, FitnessIcon } from "@/components/icons";
 import { formatDayLabel } from "@/lib/dates";
 import { useSettings } from "@/lib/settings-context";
 
@@ -24,6 +25,10 @@ function DashboardContent() {
   const { data: projects } = useProjects();
   const { data: week } = useWeek(data?.weekStart ?? "");
   const updateTask = useUpdateTask();
+  const { data: weekWorkouts } = useWorkouts(
+    { from: week?.weekStart ?? "", to: week?.weekEnd ?? "" },
+    { enabled: !!week },
+  );
 
   const activeProjects = projects?.filter((p) => p.status === "active") ?? [];
   const categoryById = (id: string | null) => categories?.find((c) => c.id === id) ?? null;
@@ -38,6 +43,9 @@ function DashboardContent() {
     (sum, d) => sum + (week?.days[d]?.filter((t) => t.status === "completed").length ?? 0),
     0,
   );
+
+  const workoutCount = weekWorkouts?.length ?? 0;
+  const workoutDistance = (weekWorkouts ?? []).reduce((sum, w) => sum + (w.distanceMiles ?? 0), 0);
 
   const avgProgress = activeProjects.length
     ? Math.round((activeProjects.reduce((sum, p) => sum + p.progress, 0) / activeProjects.length) * 100)
@@ -73,7 +81,7 @@ function DashboardContent() {
 
       <OnboardingBanner />
 
-      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-5">
         <div className="card flex flex-col gap-3.5 p-4">
           <div className="flex items-center justify-between">
             <span className="text-[12.5px] font-semibold text-text-2">Today</span>
@@ -122,6 +130,20 @@ function DashboardContent() {
             <span className="text-[12.5px] font-medium text-text-3">in progress</span>
           </div>
           <span className="text-xs text-text-3">{avgProgress}% average progress</span>
+        </div>
+
+        <div className="card flex flex-col gap-3.5 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[12.5px] font-semibold text-text-2">This week</span>
+            <FitnessIcon size={15} className="text-teal" />
+          </div>
+          <div className="flex items-baseline gap-1.5 font-display">
+            <span className="text-[28px] font-bold">{workoutCount}</span>
+            <span className="text-[12.5px] font-medium text-text-3">workout{workoutCount === 1 ? "" : "s"}</span>
+          </div>
+          <span className="text-xs text-text-3">
+            {workoutDistance > 0 ? `${workoutDistance.toFixed(1)} mi logged` : "Log one on Fitness"}
+          </span>
         </div>
       </div>
 

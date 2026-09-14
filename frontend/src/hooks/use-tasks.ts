@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tansta
 import type { Task } from "@todos/shared";
 import { api, type CreateTaskInput, type TaskFilters, type TodayResponse, type UpdateTaskInput, type WeekResponse } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useSettings } from "@/lib/settings-context";
+import { todayISO } from "@/lib/dates";
 
 function tasksKey(filters?: TaskFilters) {
   return ["tasks", filters ?? {}] as const;
@@ -147,5 +149,21 @@ export function useDeleteTask(filters?: TaskFilters) {
       if (context?.otherSnapshots) restoreCaches(queryClient, context.otherSnapshots);
     },
     onSettled: () => invalidatePlanning(queryClient),
+  });
+}
+
+export function useResetTasks() {
+  const { token } = useAuth();
+  const { timezone } = useSettings();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (scope: "upcoming" | "all") => api.tasks.reset(token!, scope, todayISO(timezone)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["week"] });
+      queryClient.invalidateQueries({ queryKey: ["today"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
   });
 }

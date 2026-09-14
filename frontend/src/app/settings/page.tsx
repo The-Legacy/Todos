@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme, type Theme } from "@/lib/theme-context";
 import { useSettings } from "@/lib/settings-context";
+import { useResetTasks } from "@/hooks/use-tasks";
+import { ApiError } from "@/lib/api";
+import { useToast } from "@/lib/toast-context";
 
 const TIMEZONES = Intl.supportedValuesOf("timeZone");
 
@@ -25,6 +28,81 @@ function SegmentedButton({ active, onClick, children }: { active: boolean; onCli
     >
       {children}
     </button>
+  );
+}
+
+function ResetTasksSection() {
+  const resetTasks = useResetTasks();
+  const { showToast } = useToast();
+  const [confirmText, setConfirmText] = useState("");
+
+  async function handleReset(scope: "upcoming" | "all", confirmMessage: string) {
+    if (!confirm(confirmMessage)) return;
+    try {
+      await resetTasks.mutateAsync(scope);
+      showToast(scope === "all" ? "All tasks deleted." : "Upcoming tasks cleared.", "info");
+      setConfirmText("");
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : "Could not reset tasks");
+    }
+  }
+
+  const wipeConfirmed = confirmText.trim().toUpperCase() === "DELETE";
+
+  return (
+    <section className="flex flex-col gap-2.5">
+      <h2 className="text-[13px] font-bold text-red">Danger zone</h2>
+      <div className="card flex flex-col gap-4 border-red/30 p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">Reset upcoming tasks</p>
+            <p className="text-xs text-text-3">
+              Deletes your backlog and everything scheduled today or later that isn&apos;t completed. Past
+              and completed tasks are kept. Recurring rules aren&apos;t touched — pause or delete those
+              separately.
+            </p>
+          </div>
+          <button
+            onClick={() =>
+              handleReset(
+                "upcoming",
+                "Delete your backlog and everything scheduled today or later that isn't completed? This can't be undone.",
+              )
+            }
+            disabled={resetTasks.isPending}
+            className="btn-secondary shrink-0 border-red/40 text-red hover:bg-red/10"
+          >
+            Reset upcoming
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-border-soft pt-4">
+          <div>
+            <p className="text-sm font-semibold">Delete all tasks</p>
+            <p className="text-xs text-text-3">
+              Permanently deletes every task you have, including history. Type DELETE to confirm.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="Type DELETE to confirm"
+              className="field sm:w-56"
+            />
+            <button
+              onClick={() =>
+                handleReset("all", "Permanently delete every task you have, including history? This can't be undone.")
+              }
+              disabled={!wipeConfirmed || resetTasks.isPending}
+              className="btn-secondary shrink-0 border-red/40 text-red hover:bg-red/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Delete all tasks
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -130,6 +208,8 @@ function SettingsContent() {
           </Link>
         </div>
       </section>
+
+      <ResetTasksSection />
     </div>
   );
 }

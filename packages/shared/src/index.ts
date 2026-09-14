@@ -82,6 +82,47 @@ export interface TaskTemplate {
   updatedAt: string;
 }
 
+export type WorkoutType = "walk" | "run" | "bike" | "weights" | "other";
+
+export type MuscleGroup = "push" | "pull" | "legs" | "arms" | "shoulders" | "chest" | "back" | "core" | "full_body";
+
+export const MUSCLE_GROUPS: MuscleGroup[] = [
+  "push",
+  "pull",
+  "legs",
+  "arms",
+  "shoulders",
+  "chest",
+  "back",
+  "core",
+  "full_body",
+];
+
+export const MUSCLE_GROUP_LABELS: Record<MuscleGroup, string> = {
+  push: "Push",
+  pull: "Pull",
+  legs: "Legs",
+  arms: "Arms",
+  shoulders: "Shoulders",
+  chest: "Chest",
+  back: "Back",
+  core: "Core",
+  full_body: "Full body",
+};
+
+export interface Workout {
+  id: string;
+  userId: string;
+  type: WorkoutType;
+  date: string;
+  durationMinutes: number | null;
+  distanceMiles: number | null;
+  muscleGroup: MuscleGroup | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;

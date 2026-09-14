@@ -22,11 +22,13 @@ import { PlannerTaskCard } from "@/components/planner-task-card";
 import { CreateTaskForm } from "@/components/create-task-form";
 import { TaskEditModal } from "@/components/task-edit-modal";
 import { TemplateQuickAdd } from "@/components/template-quick-add";
-import { ChevronLeftIcon, ChevronRightIcon } from "@/components/icons";
+import { ChevronLeftIcon, ChevronRightIcon, FitnessIcon } from "@/components/icons";
 import { useCategories } from "@/hooks/use-categories";
 import { useProjects } from "@/hooks/use-projects";
 import { useReorderTasks, useWeek } from "@/hooks/use-week";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
+import { useWorkouts } from "@/hooks/use-workouts";
+import Link from "next/link";
 import type { UpdateTaskInput, WeekResponse } from "@/lib/api";
 import { formatDayLabel, formatWeekRange, todayISO } from "@/lib/dates";
 import { useSettings } from "@/lib/settings-context";
@@ -53,6 +55,15 @@ function WeekBoard({ data, categories, projects }: WeekBoardProps) {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const { data: weekWorkouts } = useWorkouts({ from: data.weekStart, to: data.weekEnd });
+
+  const workoutCountByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const workout of weekWorkouts ?? []) {
+      counts[workout.date] = (counts[workout.date] ?? 0) + 1;
+    }
+    return counts;
+  }, [weekWorkouts]);
 
   const [columns, setColumns] = useState<Record<string, Task[]>>(() => ({ backlog: data.backlog, ...data.days }));
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -224,6 +235,17 @@ function WeekBoard({ data, categories, projects }: WeekBoardProps) {
               tasks={columns[date] ?? []}
               isToday={date === today}
               headerAction={<TemplateQuickAdd onApply={(t) => applyTemplate(t, date)} />}
+              footer={
+                workoutCountByDate[date] ? (
+                  <Link
+                    href="/fitness"
+                    className="mt-1.5 flex items-center gap-1.5 rounded-[10px] border border-border-soft px-2 py-1 text-[11px] font-semibold text-text-3 transition hover:text-accent"
+                  >
+                    <FitnessIcon size={12} />
+                    {workoutCountByDate[date]} workout{workoutCountByDate[date] > 1 ? "s" : ""}
+                  </Link>
+                ) : undefined
+              }
             >
               {(columns[date] ?? []).map((task) => (
                 <SortableTaskCard

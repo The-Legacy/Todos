@@ -166,3 +166,78 @@ describe("tasks", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("bulk reset", () => {
+  const TODAY = "2026-08-26";
+  const PAST = "2026-08-20";
+  const FUTURE = "2026-08-30";
+
+  async function seed(token: string) {
+    const backlog = await (
+      await authed(token, "/api/tasks", { method: "POST", body: JSON.stringify({ title: "Backlog item" }) })
+    ).json<any>();
+    const future = await (
+      await authed(token, "/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "Future", scheduledDate: FUTURE }),
+      })
+    ).json<any>();
+    const pastOpen = await (
+      await authed(token, "/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "Past overdue", scheduledDate: PAST }),
+      })
+    ).json<any>();
+    const completed = await (
+      await authed(token, "/api/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "Completed", scheduledDate: FUTURE }),
+      })
+    ).json<any>();
+    await authed(token, `/api/tasks/${completed.task.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "completed" }),
+    });
+    return { backlog: backlog.task, future: future.task, pastOpen: pastOpen.task, completed: completed.task };
+  }
+
+  it("scope=upcoming deletes backlog and today-or-later open tasks, keeps past and completed", async () => {
+    const { token } = await signup("reset-a@example.com");
+    await seed(token);
+
+    const res = await authed(token, `/api/tasks?scope=upcoming&today=${TODAY}`, { method: "DELETE" });
+    expect(res.status).toBe(204);
+
+    const { tasks } = await (await authed(token, "/api/tasks")).json<any>();
+    const titles = tasks.map((t: any) => t.title).sort();
+    expect(titles).toEqual(["Completed", "Past overdue"]);
+  });
+
+  it("scope=all deletes every task including history", async () => {
+    const { token } = await signup("reset-b@example.com");
+    await seed(token);
+
+    const res = await authed(token, "/api/tasks?scope=all", { method: "DELETE" });
+    expect(res.status).toBe(204);
+
+    const { tasks } = await (await authed(token, "/api/tasks")).json<any>();
+    expect(tasks).toHaveLength(0);
+  });
+
+  it("rejects an invalid scope", async () => {
+    const { token } = await signup("reset-c@example.com");
+    const res = await authed(token, "/api/tasks?scope=everything", { method: "DELETE" });
+    expect(res.status).toBe(400);
+  });
+
+  it("does not delete another user's tasks", async () => {
+    const alice = await signup("reset-d1@example.com");
+    const bob = await signup("reset-d2@example.com");
+    await seed(alice.token);
+
+    await authed(bob.token, "/api/tasks?scope=all", { method: "DELETE" });
+
+    const { tasks } = await (await authed(alice.token, "/api/tasks")).json<any>();
+    expect(tasks.length).toBeGreaterThan(0);
+  });
+});
