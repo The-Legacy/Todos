@@ -98,7 +98,7 @@ function TasksContent() {
   const [projectFilter, setProjectFilter] = useState("");
   const [search, setSearch] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { weekStartsOn } = useSettings();
+  const { weekStartsOn, timezone } = useSettings();
 
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();
@@ -136,7 +136,7 @@ function TasksContent() {
   }, [tasks, statusTab, categoryFilter, projectFilter, search]);
 
   const rows = useMemo(() => {
-    const weekStart = getWeekStart(todayISO(), weekStartsOn);
+    const weekStart = getWeekStart(todayISO(timezone), weekStartsOn);
     const thisWeekDates = new Set(getWeekDates(weekStart));
 
     const groups = new Map<string, Task[]>();
@@ -162,7 +162,7 @@ function TasksContent() {
       result.push({ kind: "group", recurringTaskId: task.recurringTaskId, representative, instances, countThisWeek });
     }
     return result;
-  }, [filteredTasks, weekStartsOn]);
+  }, [filteredTasks, weekStartsOn, timezone]);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-9 sm:px-10">

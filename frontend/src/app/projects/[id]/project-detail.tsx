@@ -13,10 +13,12 @@ import { useCategories } from "@/hooks/use-categories";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import { useDeleteProject, useProject, useUpdateProject } from "@/hooks/use-projects";
 import { todayISO } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 import { ApiError } from "@/lib/api";
 
 function ProjectDetailContent({ id }: { id: string }) {
   const router = useRouter();
+  const { timezone } = useSettings();
   const { data, isLoading } = useProject(id);
   const { data: categories } = useCategories();
   const updateProject = useUpdateProject();
@@ -127,7 +129,7 @@ function ProjectDetailContent({ id }: { id: string }) {
                   onClick={() =>
                     updateTask.mutate({
                       id: task.id,
-                      input: { status: "scheduled", scheduledDate: todayISO() },
+                      input: { status: "scheduled", scheduledDate: todayISO(timezone) },
                     })
                   }
                   className="text-xs font-semibold text-text-3 hover:text-text"

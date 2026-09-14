@@ -18,6 +18,7 @@ import {
 } from "@/hooks/use-recurring-tasks";
 import { ApiError } from "@/lib/api";
 import { todayISO } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 
 function ProjectSelect({
   projects,
@@ -44,6 +45,7 @@ function CreateRecurringForm() {
   const createRecurringTask = useCreateRecurringTask();
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();
+  const { timezone } = useSettings();
   const [title, setTitle] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [projectId, setProjectId] = useState("");
@@ -63,7 +65,7 @@ function CreateRecurringForm() {
         projectId: projectId || null,
         priority,
         daysOfWeek: days,
-        startDate: todayISO(),
+        startDate: todayISO(timezone),
       });
       setTitle("");
       setDays([]);

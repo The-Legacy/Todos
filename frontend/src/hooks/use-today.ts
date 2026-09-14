@@ -1,15 +1,17 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { todayISO } from "@/lib/dates";
 import { useSettings } from "@/lib/settings-context";
 
 export function useToday(date?: string) {
   const { token } = useAuth();
-  const { weekStartsOn } = useSettings();
+  const { weekStartsOn, timezone } = useSettings();
+  const resolvedDate = date ?? todayISO(timezone);
 
   return useQuery({
-    queryKey: ["today", date ?? "current", weekStartsOn],
-    queryFn: () => api.today(token!, date, weekStartsOn),
+    queryKey: ["today", resolvedDate, weekStartsOn],
+    queryFn: () => api.today(token!, resolvedDate, weekStartsOn),
     enabled: !!token,
   });
 }

@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { RequireAuth } from "@/components/require-auth";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme, type Theme } from "@/lib/theme-context";
 import { useSettings } from "@/lib/settings-context";
+
+const TIMEZONES = Intl.supportedValuesOf("timeZone");
 
 const THEME_OPTIONS: Array<{ value: Theme; label: string }> = [
   { value: "light", label: "Light" },
@@ -28,7 +31,21 @@ function SegmentedButton({ active, onClick, children }: { active: boolean; onCli
 function SettingsContent() {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
-  const { weekStartsOn, setWeekStartsOn, defaultDurationMinutes, setDefaultDurationMinutes } = useSettings();
+  const { weekStartsOn, setWeekStartsOn, defaultDurationMinutes, setDefaultDurationMinutes, timezone, setTimezone } =
+    useSettings();
+
+  const currentTime = useMemo(() => {
+    try {
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: timezone,
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date());
+    } catch {
+      return null;
+    }
+  }, [timezone]);
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-7 px-6 py-9 sm:px-10">
@@ -54,6 +71,22 @@ function SettingsContent() {
             </SegmentedButton>
           ))}
         </div>
+      </section>
+
+      <section className="flex flex-col gap-2.5">
+        <h2 className="text-[13px] font-bold">Timezone</h2>
+        <p className="text-xs text-text-3">
+          Determines what &quot;today&quot; means for Today, Week, and Backlog — and when a recurring
+          task&apos;s day rolls over.
+        </p>
+        <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="field">
+          {TIMEZONES.map((tz) => (
+            <option key={tz} value={tz}>
+              {tz.replace(/_/g, " ")}
+            </option>
+          ))}
+        </select>
+        {currentTime && <p className="text-xs text-text-3">Current time there: {currentTime}</p>}
       </section>
 
       <section className="flex flex-col gap-2.5">

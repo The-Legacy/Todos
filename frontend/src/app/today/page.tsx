@@ -13,9 +13,11 @@ import { useProjects } from "@/hooks/use-projects";
 import { useToday } from "@/hooks/use-today";
 import { useCreateTask, useDeleteTask, useUpdateTask } from "@/hooks/use-tasks";
 import { todayISO } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 
 function TodayContent() {
-  const date = todayISO();
+  const { timezone } = useSettings();
+  const date = todayISO(timezone);
   const { data, isLoading } = useToday(date);
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();

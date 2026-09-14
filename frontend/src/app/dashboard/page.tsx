@@ -14,9 +14,11 @@ import { ProgressBar } from "@/components/progress-bar";
 import { OnboardingBanner } from "@/components/onboarding-banner";
 import { CheckIcon, TodayIcon, WeekIcon, BacklogIcon, ProjectsIcon } from "@/components/icons";
 import { formatDayLabel } from "@/lib/dates";
+import { useSettings } from "@/lib/settings-context";
 
 function DashboardContent() {
   const { user } = useAuth();
+  const { timezone } = useSettings();
   const { data } = useToday();
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();
@@ -42,11 +44,13 @@ function DashboardContent() {
     : 0;
 
   const greeting = useMemo(() => {
-    const hour = new Date().getHours();
+    const hour = Number(
+      new Intl.DateTimeFormat("en-US", { timeZone: timezone, hour: "numeric", hourCycle: "h23" }).format(new Date()),
+    );
     if (hour < 12) return "Good morning";
     if (hour < 18) return "Good afternoon";
     return "Good evening";
-  }, []);
+  }, [timezone]);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 px-6 py-9 sm:px-10">

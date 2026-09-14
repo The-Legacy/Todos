@@ -47,7 +47,8 @@ interface WeekBoardProps {
 }
 
 function WeekBoard({ data, categories, projects }: WeekBoardProps) {
-  const today = todayISO();
+  const { timezone } = useSettings();
+  const today = todayISO(timezone);
   const reorderTasks = useReorderTasks();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -265,8 +266,8 @@ function WeekBoard({ data, categories, projects }: WeekBoardProps) {
 }
 
 function WeekContent() {
-  const { weekStartsOn } = useSettings();
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO(), weekStartsOn));
+  const { weekStartsOn, timezone } = useSettings();
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO(timezone), weekStartsOn));
   const { data, isLoading } = useWeek(weekStart);
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();
@@ -288,7 +289,7 @@ function WeekContent() {
               <ChevronLeftIcon size={15} />
             </button>
             <button
-              onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
+              onClick={() => setWeekStart(getWeekStart(todayISO(timezone), weekStartsOn))}
               className="rounded-lg bg-surface-2 px-3.5 py-1.5 text-[12.5px] font-semibold"
             >
               This week

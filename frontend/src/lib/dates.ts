@@ -3,8 +3,11 @@
 // whether the user's weeks start on Monday or Sunday.
 const WEEKDAY_LABELS_BY_DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+export function todayISO(timezone?: string): string {
+  if (!timezone) return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(
+    new Date(),
+  );
 }
 
 export function formatDayLabel(dateISO: string): string {

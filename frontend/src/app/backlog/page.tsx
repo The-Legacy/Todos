@@ -15,8 +15,8 @@ import { formatDayLabel, formatWeekRange, todayISO } from "@/lib/dates";
 import { useSettings } from "@/lib/settings-context";
 
 function BacklogContent() {
-  const { weekStartsOn } = useSettings();
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO(), weekStartsOn));
+  const { weekStartsOn, timezone } = useSettings();
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(todayISO(timezone), weekStartsOn));
   const { data: backlogTasks, isLoading } = useTasks({ status: "backlog" });
   const { data: categories } = useCategories();
   const { data: projects } = useProjects();
@@ -81,7 +81,7 @@ function BacklogContent() {
                   primaryAction={{
                     label: "Add to today",
                     onClick: () =>
-                      updateTask.mutate({ id: task.id, input: { status: "scheduled", scheduledDate: todayISO() } }),
+                      updateTask.mutate({ id: task.id, input: { status: "scheduled", scheduledDate: todayISO(timezone) } }),
                   }}
                   moveOptions={dates.map((d) => ({ value: d, label: formatDayLabel(d) }))}
                   onMove={(dest) => updateTask.mutate({ id: task.id, input: { status: "scheduled", scheduledDate: dest } })}
@@ -107,7 +107,7 @@ function BacklogContent() {
               <ChevronLeftIcon size={15} />
             </button>
             <button
-              onClick={() => setWeekStart(getWeekStart(todayISO(), weekStartsOn))}
+              onClick={() => setWeekStart(getWeekStart(todayISO(timezone), weekStartsOn))}
               className="rounded-lg px-3.5 py-1.5 text-[12.5px] font-semibold hover:bg-surface"
             >
               This week
