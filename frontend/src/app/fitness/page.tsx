@@ -9,12 +9,14 @@ import { useCreateWorkout, useDeleteWorkout, useUpdateWorkout, useWorkouts } fro
 import { ApiError } from "@/lib/api";
 import { formatDayLabel } from "@/lib/dates";
 import { useToast } from "@/lib/toast-context";
+import { useConfirm } from "@/lib/confirm-context";
 
 function WorkoutRow({ workout }: { workout: Workout }) {
   const [editing, setEditing] = useState(false);
   const updateWorkout = useUpdateWorkout();
   const deleteWorkout = useDeleteWorkout();
   const { showToast } = useToast();
+  const confirm = useConfirm();
 
   if (editing) {
     return (
@@ -55,7 +57,7 @@ function WorkoutRow({ workout }: { workout: Workout }) {
         </button>
         <button
           onClick={async () => {
-            if (!confirm("Delete this workout?")) return;
+            if (!(await confirm({ message: "Delete this workout?", confirmLabel: "Delete", danger: true }))) return;
             try {
               await deleteWorkout.mutateAsync(workout.id);
             } catch (err) {

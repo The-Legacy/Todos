@@ -9,6 +9,7 @@ import { useSettings } from "@/lib/settings-context";
 import { useResetTasks } from "@/hooks/use-tasks";
 import { ApiError } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
+import { useConfirm } from "@/lib/confirm-context";
 
 const TIMEZONES = Intl.supportedValuesOf("timeZone");
 
@@ -34,10 +35,12 @@ function SegmentedButton({ active, onClick, children }: { active: boolean; onCli
 function ResetTasksSection() {
   const resetTasks = useResetTasks();
   const { showToast } = useToast();
+  const confirm = useConfirm();
   const [confirmText, setConfirmText] = useState("");
 
   async function handleReset(scope: "upcoming" | "overdue" | "all", confirmMessage: string) {
-    if (!confirm(confirmMessage)) return;
+    const confirmed = await confirm({ message: confirmMessage, confirmLabel: "Delete", danger: true });
+    if (!confirmed) return;
     try {
       await resetTasks.mutateAsync(scope);
       const message =

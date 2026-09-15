@@ -6,6 +6,7 @@ import { QueryProvider } from "@/lib/query-provider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme-context";
 import { SettingsProvider } from "@/lib/settings-context";
 import { ToastProvider } from "@/lib/toast-context";
+import { ConfirmProvider } from "@/lib/confirm-context";
 import { Sidebar } from "@/components/sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 
@@ -43,21 +44,23 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col bg-bg font-sans text-text">
         <ToastProvider>
-          <QueryProvider>
-            <AuthProvider>
-              <ThemeProvider>
-                <SettingsProvider>
-                  <div className="flex min-h-full flex-1">
-                    <Sidebar />
-                    <div className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-                      {children}
+          <ConfirmProvider>
+            <QueryProvider>
+              <AuthProvider>
+                <ThemeProvider>
+                  <SettingsProvider>
+                    <div className="flex min-h-full flex-1">
+                      <Sidebar />
+                      <div className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+                        {children}
+                      </div>
                     </div>
-                  </div>
-                  <BottomNav />
-                </SettingsProvider>
-              </ThemeProvider>
-            </AuthProvider>
-          </QueryProvider>
+                    <BottomNav />
+                  </SettingsProvider>
+                </ThemeProvider>
+              </AuthProvider>
+            </QueryProvider>
+          </ConfirmProvider>
         </ToastProvider>
       </body>
     </html>

@@ -7,12 +7,14 @@ import { summarizeWorkout, WORKOUT_TYPE_LABELS, WorkoutForm } from "@/components
 import { useCreateWorkout, useDeleteWorkout, useWorkouts } from "@/hooks/use-workouts";
 import { ApiError } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
+import { useConfirm } from "@/lib/confirm-context";
 
 export function DayWorkoutsCard({ date }: { date: string }) {
   const { data: workouts, isLoading } = useWorkouts({ date });
   const createWorkout = useCreateWorkout();
   const deleteWorkout = useDeleteWorkout();
   const { showToast } = useToast();
+  const confirm = useConfirm();
   const [showForm, setShowForm] = useState(false);
 
   return (
@@ -56,7 +58,7 @@ export function DayWorkoutsCard({ date }: { date: string }) {
             </div>
             <button
               onClick={async () => {
-                if (!confirm("Delete this workout?")) return;
+                if (!(await confirm({ message: "Delete this workout?", confirmLabel: "Delete", danger: true }))) return;
                 try {
                   await deleteWorkout.mutateAsync(workout.id);
                 } catch (err) {

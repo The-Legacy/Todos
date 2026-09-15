@@ -15,6 +15,7 @@ import { useDeleteProject, useProject, useUpdateProject } from "@/hooks/use-proj
 import { todayISO } from "@/lib/dates";
 import { useSettings } from "@/lib/settings-context";
 import { ApiError } from "@/lib/api";
+import { useConfirm } from "@/lib/confirm-context";
 
 function ProjectDetailContent({ id }: { id: string }) {
   const router = useRouter();
@@ -23,6 +24,7 @@ function ProjectDetailContent({ id }: { id: string }) {
   const { data: categories } = useCategories();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
+  const confirm = useConfirm();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
@@ -87,7 +89,12 @@ function ProjectDetailContent({ id }: { id: string }) {
         </p>
         <button
           onClick={async () => {
-            if (!confirm(`Delete "${project.name}"? Its tasks will be kept, just unassigned from the project.`)) return;
+            const confirmed = await confirm({
+              message: `Delete "${project.name}"? Its tasks will be kept, just unassigned from the project.`,
+              confirmLabel: "Delete",
+              danger: true,
+            });
+            if (!confirmed) return;
             await deleteProject.mutateAsync(id);
             router.replace("/projects");
           }}
