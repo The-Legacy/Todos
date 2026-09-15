@@ -36,11 +36,13 @@ function ResetTasksSection() {
   const { showToast } = useToast();
   const [confirmText, setConfirmText] = useState("");
 
-  async function handleReset(scope: "upcoming" | "all", confirmMessage: string) {
+  async function handleReset(scope: "upcoming" | "overdue" | "all", confirmMessage: string) {
     if (!confirm(confirmMessage)) return;
     try {
       await resetTasks.mutateAsync(scope);
-      showToast(scope === "all" ? "All tasks deleted." : "Upcoming tasks cleared.", "info");
+      const message =
+        scope === "all" ? "All tasks deleted." : scope === "overdue" ? "Overdue tasks cleared." : "Upcoming tasks cleared.";
+      showToast(message, "info");
       setConfirmText("");
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : "Could not reset tasks");
@@ -73,6 +75,25 @@ function ResetTasksSection() {
             className="btn-secondary shrink-0 border-red/40 text-red hover:bg-red/10"
           >
             Reset upcoming
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">Clear overdue tasks</p>
+            <p className="text-xs text-text-3">
+              Deletes tasks still sitting in Overdue — scheduled for a day before today and never
+              completed or rescheduled. Everything else is left alone.
+            </p>
+          </div>
+          <button
+            onClick={() =>
+              handleReset("overdue", "Delete every task that's still overdue? This can't be undone.")
+            }
+            disabled={resetTasks.isPending}
+            className="btn-secondary shrink-0 border-red/40 text-red hover:bg-red/10"
+          >
+            Clear overdue
           </button>
         </div>
 

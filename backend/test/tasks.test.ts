@@ -213,6 +213,18 @@ describe("bulk reset", () => {
     expect(titles).toEqual(["Completed", "Past overdue"]);
   });
 
+  it("scope=overdue deletes only still-scheduled tasks from before today", async () => {
+    const { token } = await signup("reset-e@example.com");
+    await seed(token);
+
+    const res = await authed(token, `/api/tasks?scope=overdue&today=${TODAY}`, { method: "DELETE" });
+    expect(res.status).toBe(204);
+
+    const { tasks } = await (await authed(token, "/api/tasks")).json<any>();
+    const titles = tasks.map((t: any) => t.title).sort();
+    expect(titles).toEqual(["Backlog item", "Completed", "Future"]);
+  });
+
   it("scope=all deletes every task including history", async () => {
     const { token } = await signup("reset-b@example.com");
     await seed(token);

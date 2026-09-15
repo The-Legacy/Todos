@@ -243,7 +243,7 @@ export const api = {
     remove: (token: string, id: string) => request<void>(`/api/tasks/${id}`, { method: "DELETE", token }),
     reorder: (token: string, updates: ReorderUpdate[]) =>
       request<{ tasks: Task[] }>("/api/tasks/reorder", { method: "POST", token, body: JSON.stringify({ updates }) }),
-    reset: (token: string, scope: "upcoming" | "all", today?: string) => {
+    reset: (token: string, scope: "upcoming" | "overdue" | "all", today?: string) => {
       const params = new URLSearchParams({ scope });
       if (today) params.set("today", today);
       return request<void>(`/api/tasks?${params.toString()}`, { method: "DELETE", token });

@@ -344,8 +344,8 @@ tasks.delete("/", async (c) => {
   const userId = c.get("userId");
   const scope = c.req.query("scope");
 
-  if (scope !== "upcoming" && scope !== "all") {
-    return c.json({ error: "scope must be 'upcoming' or 'all'" }, 400);
+  if (scope !== "upcoming" && scope !== "all" && scope !== "overdue") {
+    return c.json({ error: "scope must be 'upcoming', 'overdue', or 'all'" }, 400);
   }
 
   if (scope === "all") {
@@ -356,6 +356,14 @@ tasks.delete("/", async (c) => {
   const today = c.req.query("today") ?? new Date().toISOString().slice(0, 10);
   if (!isValidDate(today)) {
     return c.json({ error: "today must be an ISO date (YYYY-MM-DD)" }, 400);
+  }
+
+  if (scope === "overdue") {
+    // Matches the "Overdue" section on Today: still scheduled, but for a day before today.
+    await c.env.DB.prepare(`DELETE FROM tasks WHERE user_id = ? AND status = 'scheduled' AND scheduled_date < ?`)
+      .bind(userId, today)
+      .run();
+    return c.body(null, 204);
   }
 
   // "Upcoming": everything not yet done — backlog items (no date) plus anything scheduled today

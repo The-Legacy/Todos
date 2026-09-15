@@ -158,7 +158,7 @@ export function useResetTasks() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (scope: "upcoming" | "all") => api.tasks.reset(token!, scope, todayISO(timezone)),
+    mutationFn: (scope: "upcoming" | "overdue" | "all") => api.tasks.reset(token!, scope, todayISO(timezone)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["week"] });
